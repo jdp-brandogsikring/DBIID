@@ -9,24 +9,44 @@
 
 Welcome to your new app.
 
-@foreach (var item in users)
+@errorMessage
+
+@if (users == null)
 {
-    <p>@item.Id - @item.GivenName - @item.FamilyName</p>
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var item in users)
+    {
+        <p>@item.Id - @item.GivenName - @item.FamilyName</p>
+    }
 }
 
-@code{
+@code {
     [Inject]
     private IApiRequestService apiRequestService { get; set; }
 
-    private List<UserDto> users = new List<UserDto>();
+    private List<UserDto> users;
+
+    private string errorMessage = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            try{
-                users = (await apiRequestService.SendAsync(new GetAllUserQuery())).ToList();
-            } catch (Exception ex)
+            try
+            {
+
+                var response = await apiRequestService.SendAsync(new GetAllUserQuery());
+                if (response.IsSuccess)
+                    users = response.Value.ToList();
+                else
+                    errorMessage = response.Message;
+
+
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }

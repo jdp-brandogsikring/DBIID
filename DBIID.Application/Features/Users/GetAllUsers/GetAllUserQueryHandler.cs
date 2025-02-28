@@ -8,10 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DBIID.Shared.Features.Users;
+using DBIID.Shared.Results;
 
 namespace DBIID.Application.Features.Users.GetAllUsers
 {
-    internal class GetAllUserQueryHandler : IQueryHandler<GetAllUserQuery, IEnumerable<UserDto>>
+    internal class GetAllUserQueryHandler : IQueryHandler<GetAllUserQuery, Result<IEnumerable<UserDto>>>
     {
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
@@ -22,10 +23,10 @@ namespace DBIID.Application.Features.Users.GetAllUsers
             this.userRepository = userRepository;
             this.mapper = mapper;
         }
-        public async Task<IEnumerable<UserDto>> Handle(GetAllUserQuery request, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<UserDto>>> Handle(GetAllUserQuery request, CancellationToken cancellationToken)
         {
             var users = userRepository.GetAll();
-            return mapper.Map<IEnumerable<UserDto>>(users);
+            return Result<IEnumerable<UserDto>>.Success(mapper.Map<IEnumerable<UserDto>>(users));
         }
     }
 }
