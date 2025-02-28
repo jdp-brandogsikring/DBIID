@@ -30,14 +30,12 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
             var path = $"/api/{attr.Route}";
             var method = attr.Method.ToLower();
             var resourceGroup = GetResourceGroup(attr.Route);
-
-            // 🔹 Extract response type from IRequest<TResponse>
             var responseType = GetIRequestResponseType(requestType);
 
             var operation = new OpenApiOperation
             {
                 Summary = $"Dynamically generated endpoint for {requestType.Name}",
-                Tags = new List<OpenApiTag> { new OpenApiTag { Name = resourceGroup } }, // ✅ Group by resource
+                Tags = new List<OpenApiTag> { new OpenApiTag { Name = resourceGroup } },
                 Responses = new OpenApiResponses
                 {
                     ["200"] = new OpenApiResponse
@@ -79,17 +77,24 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
                 }
             }
 
-            // 🔹 Exclude request body (only allow path params for GET and DELETE)
+            // 🔹 Manually generate request body schema instead of using `$ref`
             if (method != "get" && method != "delete")
             {
+                var schema = new OpenApiSchema
+                {
+                    Type = "object",
+                    Properties = properties.ToDictionary(
+                        p => p.Value.Name,
+                        p => new OpenApiSchema { Type = GetOpenApiType(p.Value.PropertyType) }
+                    ),
+                    Required = properties.Values.Select(p => p.Name).ToHashSet()
+                };
+
                 operation.RequestBody = new OpenApiRequestBody
                 {
                     Content = new Dictionary<string, OpenApiMediaType>
                     {
-                        ["application/json"] = new OpenApiMediaType
-                        {
-                            Schema = context.SchemaGenerator.GenerateSchema(requestType, context.SchemaRepository)
-                        }
+                        ["application/json"] = new OpenApiMediaType { Schema = schema }
                     }
                 };
             }
@@ -140,7 +145,6 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
                "string"; // Default fallback
     }
 
-    // 🔹 Extract TResponse from IRequest<TResponse>
     private static Type GetIRequestResponseType(Type requestType)
     {
         var interfaceType = requestType.GetInterfaces()
@@ -149,7 +153,6 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
         return interfaceType?.GetGenericArguments().FirstOrDefault();
     }
 
-    // 🔹 Extracts the first part of the route (User, Group, etc.)
     private static string GetResourceGroup(string route)
     {
         var firstSegment = route.Split('/').FirstOrDefault();

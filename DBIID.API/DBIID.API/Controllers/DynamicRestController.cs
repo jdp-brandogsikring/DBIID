@@ -20,7 +20,7 @@ public class DynamicRestController : ControllerBase
     public DynamicRestController(IMediator mediator, Assembly assembly)
     {
         _mediator = mediator;
-        _assembly = assembly; // Injected assembly reference
+        _assembly = assembly;
     }
 
     [HttpGet, HttpPost, HttpPut, HttpDelete]
@@ -31,19 +31,21 @@ public class DynamicRestController : ControllerBase
         if (requestType == null)
             return NotFound("No matching request found.");
 
-        // 🔹 1️⃣ Opret request-instans
         var requestInstance = Activator.CreateInstance(requestType);
         var errors = new List<string>();
 
-        // 🔹 2️⃣ Hent URL-variabler fra ruten
+        // 🔹 Extract URL parameters
         var attribute = requestType.GetCustomAttribute<HttpRequestAttribute>();
         var paramNames = ExtractRouteParameters(attribute.Route);
         var paramValues = ExtractValuesFromUrl(attribute.Route, url);
 
-        // 🔹 3️⃣ Map URL-variabler til request-properties (CASE-INSENSITIVE + VALIDERING)
+        // 🔹 Map URL parameters to request properties (case-insensitive)
         var properties = requestType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                     .ToDictionary(p => p.Name.ToLower(), p => p);
 
+        var requestBodyDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        // 🔹 Map URL params and validate type conversion
         foreach (var param in paramNames)
         {
             string paramLower = param.ToLower();
@@ -56,10 +58,13 @@ public class DynamicRestController : ControllerBase
                     {
                         object convertedValue = Convert.ChangeType(paramValues[paramLower], prop.PropertyType);
                         prop.SetValue(requestInstance, convertedValue);
+
+                        // Save mapped URL values for later validation
+                        requestBodyDict[paramLower] = convertedValue;
                     }
                     catch (Exception)
                     {
-                        errors.Add($"Parameter '{param}' could not be converted to {prop.PropertyType.Name}.");
+                        errors.Add($"Parameter '{param}' in the URL could not be converted to {prop.PropertyType.Name}.");
                     }
                 }
             }
@@ -69,21 +74,41 @@ public class DynamicRestController : ControllerBase
             }
         }
 
-        // 🔹 4️⃣ Returner fejl hvis der er nogen
-        if (errors.Any())
-        {
-            return BadRequest(new { errors });
-        }
-
-        // 🔹 5️⃣ Kun map request-body, hvis IKKE DELETE
+        // 🔹 Deserialize and validate the request body if not GET or DELETE
         if (Request.Method != "GET" && Request.Method != "DELETE" && requestBody != null)
         {
             var bodyData = JsonSerializer.Deserialize(requestBody.ToString(), requestType);
             foreach (var prop in requestType.GetProperties())
             {
                 var value = prop.GetValue(bodyData);
-                if (value != null) prop.SetValue(requestInstance, value);
+                if (value != null)
+                {
+                    prop.SetValue(requestInstance, value);
+                    requestBodyDict[prop.Name.ToLower()] = value;
+                }
             }
+
+            // 🔹 Compare URL values with Body values
+            foreach (var param in paramNames)
+            {
+                string paramLower = param.ToLower();
+                if (requestBodyDict.ContainsKey(paramLower) && paramValues.ContainsKey(paramLower))
+                {
+                    var urlValue = requestBodyDict[paramLower]?.ToString();
+                    var bodyValue = paramValues[paramLower]?.ToString();
+
+                    if (!string.Equals(urlValue, bodyValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        errors.Add($"Mismatch: '{param}' in URL ('{bodyValue}') does not match '{param}' in body ('{urlValue}').");
+                    }
+                }
+            }
+        }
+
+        // 🔹 Return errors if any exist
+        if (errors.Any())
+        {
+            return BadRequest(new { errors });
         }
 
         var response = await _mediator.Send(requestInstance);
@@ -92,7 +117,6 @@ public class DynamicRestController : ControllerBase
 
     private Type FindRequestType(string url, string method)
     {
-
         var allRequests = _assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<HttpRequestAttribute>() != null)
             .Select(t => new
@@ -103,11 +127,9 @@ public class DynamicRestController : ControllerBase
             .Where(t => t.Attribute.Method.Equals(method, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        // 🔹 1️⃣ Eksakte ruter (f.eks. "User/All") matcher først
         var exactMatch = allRequests.FirstOrDefault(t => t.Attribute.Route.Equals(url, StringComparison.OrdinalIgnoreCase));
         if (exactMatch != null) return exactMatch.Type;
 
-        // 🔹 2️⃣ Matcher `{}`-ruter (f.eks. "User/{id}")
         foreach (var request in allRequests.OrderBy(t => t.Attribute.Route.Count(c => c == '{')))
         {
             string routePattern = "^" + ConvertRouteToRegex(request.Attribute.Route) + "$";
@@ -121,7 +143,6 @@ public class DynamicRestController : ControllerBase
         return null;
     }
 
-    // 🔹 Ekstraherer `{}`-parametre fra ruten
     private static List<string> ExtractRouteParameters(string route)
     {
         return Regex.Matches(route, @"{(\w+)}")
@@ -129,7 +150,6 @@ public class DynamicRestController : ControllerBase
             .ToList();
     }
 
-    // 🔹 Matcher `{}`-parametre med værdier fra URL'en
     private static Dictionary<string, string> ExtractValuesFromUrl(string route, string url)
     {
         string pattern = "^" + ConvertRouteToRegex(route) + "$";
@@ -144,12 +164,11 @@ public class DynamicRestController : ControllerBase
         return paramValues;
     }
 
-    // 🔹 Konverter `{param}` til regex
     private static string ConvertRouteToRegex(string route)
     {
         return route
             .Replace("/", "\\/") // Escape slashes
             .Replace("{", "(?<") // Start named group
-            .Replace("}", ">[^/]+)"); // Match alt undtagen "/"
+            .Replace("}", ">[^/]+)"); // Match everything except "/"
     }
 }
