@@ -17,13 +17,6 @@ namespace DBIID.Application.Features.Users
         public int Id { get; set; }
     }
 
-    // GET Request
-    [HttpRequest("GET", "User/Read/{id}/{security}")]
-    public class GetUserADDQuery : IRequest<UserDto>
-    {
-        public int Id { get; set; }
-        public string Security { get; set; }
-    }
 
     // POST Request
     [HttpRequest("POST", "User/Create")]
@@ -48,23 +41,36 @@ namespace DBIID.Application.Features.Users
         public int Id { get; set; }
     }
 
-    // DELETE Request
-    [HttpRequest("DELETE", "User/Delete/{id}/{security}")]
-    public class DeleteUserasCommand : IRequest<bool>
+
+    // GET Request
+    [HttpRequest("GET", "Group/Read/{id}")]
+    public class GetGroupQuery : IRequest<UserDto>
     {
         public int Id { get; set; }
-        public string Security { get; set; }
     }
 
 
+    // POST Request
+    [HttpRequest("POST", "Group/Create")]
+    public class CreateGroupCommand : IRequest<UserDto>
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
 
-    //[HttpRequest("GET", "User/Read/{id}")]
-    //public class GetUserDuplicateQuery : IRequest<UserDto>
-    //{
-    //    public int Id { get; set; }
-    //}
+    // PUT Request
+    [HttpRequest("PUT", "Group/Update/{id}")]
+    public class UpdateGroupCommand : IRequest<bool>
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
 
+    // DELETE Request
+    [HttpRequest("DELETE", "Group/Delete/{id}")]
+    public class DeleteGroupCommand : IRequest<bool>
+    {
+        public int Id { get; set; }
+    }
 
-    //[HttpRequest("POST", "User/Create")]
-    //public class CreateUserDuplicateCommand : IRequest<bool> { }
 }

@@ -40,7 +40,7 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Description = "Automatisk genereret REST API med CQRS og MediatR"
     });
-    options.DocumentFilter<IRequestSwaggerDocumentFilter>();
+    options.DocumentFilter<RequestSwaggerDocumentFilter>();
 });
 
 var app = builder.Build();

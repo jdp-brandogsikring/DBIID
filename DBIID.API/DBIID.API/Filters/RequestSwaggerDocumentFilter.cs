@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-public class IRequestSwaggerDocumentFilter : IDocumentFilter
+public class RequestSwaggerDocumentFilter : IDocumentFilter
 {
     private readonly Assembly _assembly;
 
-    public IRequestSwaggerDocumentFilter(Assembly assembly)
+    public RequestSwaggerDocumentFilter(Assembly assembly)
     {
         _assembly = assembly; // Injected assembly reference
     }
@@ -29,6 +29,7 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
 
             var path = $"/api/{attr.Route}";
             var method = attr.Method.ToLower();
+            var resourceGroup = GetResourceGroup(attr.Route);
 
             // 🔹 Extract response type from IRequest<TResponse>
             var responseType = GetIRequestResponseType(requestType);
@@ -36,6 +37,7 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
             var operation = new OpenApiOperation
             {
                 Summary = $"Dynamically generated endpoint for {requestType.Name}",
+                Tags = new List<OpenApiTag> { new OpenApiTag { Name = resourceGroup } }, // ✅ Group by resource
                 Responses = new OpenApiResponses
                 {
                     ["200"] = new OpenApiResponse
@@ -77,7 +79,7 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
                 }
             }
 
-            // 🔹 Remove request body for GET and DELETE requests
+            // 🔹 Exclude request body (only allow path params for GET and DELETE)
             if (method != "get" && method != "delete")
             {
                 operation.RequestBody = new OpenApiRequestBody
@@ -98,6 +100,16 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
             }
 
             swaggerDoc.Paths[path].Operations[GetOperationType(method)] = operation;
+        }
+
+        // 🔹 Remove Command and Query classes from Swagger's schema section
+        var requestTypeNames = requestTypes.Select(t => t.Name).ToHashSet();
+        foreach (var key in context.SchemaRepository.Schemas.Keys.ToList())
+        {
+            if (requestTypeNames.Contains(key))
+            {
+                context.SchemaRepository.Schemas.Remove(key);
+            }
         }
     }
 
@@ -135,5 +147,12 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
             .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
 
         return interfaceType?.GetGenericArguments().FirstOrDefault();
+    }
+
+    // 🔹 Extracts the first part of the route (User, Group, etc.)
+    private static string GetResourceGroup(string route)
+    {
+        var firstSegment = route.Split('/').FirstOrDefault();
+        return !string.IsNullOrEmpty(firstSegment) ? $"{firstSegment}Controller" : "General";
     }
 }
