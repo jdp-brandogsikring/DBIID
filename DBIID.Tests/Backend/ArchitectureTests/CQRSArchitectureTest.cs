@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DBIID.Tests.ArchitectureTests
+namespace DBIID.Tests.Backend.ArchitectureTests
 {
     public class CQRSArchitectureTest
     {

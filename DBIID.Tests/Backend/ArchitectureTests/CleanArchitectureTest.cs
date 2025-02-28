@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DBIID.Tests.ArchitectureTests
+namespace DBIID.Tests.Backend.ArchitectureTests
 {
     public class CleanArchitectureTest
     {
@@ -19,12 +19,12 @@ namespace DBIID.Tests.ArchitectureTests
 
         public CleanArchitectureTest()
         {
-            ApiNamespace = typeof(DBIID.API.AssemblyReference).Namespace;
-            ApiClientNamespace = typeof(DBIID.API.Client.AssemblyReference).Namespace;
-            ApplicationNamespace = typeof(DBIID.Application.AssemblyReference).Namespace;
-            DomainNamespace = typeof(DBIID.Domain.AssemblyReference).Namespace;
-            InfrastructureNamespace = typeof(DBIID.Infrastructure.AssemblyReference).Namespace;
-            SharedNamespace = typeof(DBIID.Shared.AssemblyReference).Namespace;
+            ApiNamespace = typeof(API.AssemblyReference).Namespace;
+            ApiClientNamespace = typeof(API.Client.AssemblyReference).Namespace;
+            ApplicationNamespace = typeof(Application.AssemblyReference).Namespace;
+            DomainNamespace = typeof(Domain.AssemblyReference).Namespace;
+            InfrastructureNamespace = typeof(Infrastructure.AssemblyReference).Namespace;
+            SharedNamespace = typeof(Shared.AssemblyReference).Namespace;
         }
 
 
