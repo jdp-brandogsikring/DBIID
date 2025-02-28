@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace DBIID.Application.Common.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public class HttpRequestAttribute : Attribute
     {
-        public string Method { get; }
+        public HttpMethodType Method { get; }
         public string Route { get; }
 
-        public HttpRequestAttribute(string method, string route)
+        public HttpRequestAttribute(HttpMethodType method, string route)
         {
-            Method = method.ToUpper(); // Ensartede metoder
+            Method = method;
             Route = route;
         }
     }

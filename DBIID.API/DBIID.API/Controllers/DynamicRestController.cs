@@ -117,6 +117,9 @@ public class DynamicRestController : ControllerBase
 
     private Type FindRequestType(string url, string method)
     {
+        if (!Enum.TryParse<HttpMethodType>(method, true, out var methodEnum))
+            return null;
+
         var allRequests = _assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<HttpRequestAttribute>() != null)
             .Select(t => new
@@ -124,7 +127,7 @@ public class DynamicRestController : ControllerBase
                 Type = t,
                 Attribute = t.GetCustomAttribute<HttpRequestAttribute>()
             })
-            .Where(t => t.Attribute.Method.Equals(method, StringComparison.OrdinalIgnoreCase))
+            .Where(t => t.Attribute.Method == methodEnum)
             .ToList();
 
         var exactMatch = allRequests.FirstOrDefault(t => t.Attribute.Route.Equals(url, StringComparison.OrdinalIgnoreCase));

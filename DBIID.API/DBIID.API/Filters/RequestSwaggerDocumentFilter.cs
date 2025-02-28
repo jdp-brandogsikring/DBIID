@@ -28,7 +28,7 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
             if (attr == null) continue;
 
             var path = $"/api/{attr.Route}";
-            var method = attr.Method.ToLower();
+            var method = attr.Method;
             var resourceGroup = GetResourceGroup(attr.Route);
             var responseType = GetIRequestResponseType(requestType);
 
@@ -78,7 +78,7 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
             }
 
             // 🔹 Manually generate request body schema instead of using `$ref`
-            if (method != "get" && method != "delete")
+            if (method != HttpMethodType.GET && method != HttpMethodType.DELETE)
             {
                 var schema = new OpenApiSchema
                 {
@@ -118,14 +118,14 @@ public class RequestSwaggerDocumentFilter : IDocumentFilter
         }
     }
 
-    private static OperationType GetOperationType(string method)
+    private static OperationType GetOperationType(HttpMethodType method)
     {
         return method switch
         {
-            "get" => OperationType.Get,
-            "post" => OperationType.Post,
-            "put" => OperationType.Put,
-            "delete" => OperationType.Delete,
+            HttpMethodType.GET => OperationType.Get,
+            HttpMethodType.POST => OperationType.Post,
+            HttpMethodType.PUT => OperationType.Put,
+            HttpMethodType.DELETE => OperationType.Delete,
             _ => throw new NotImplementedException()
         };
     }

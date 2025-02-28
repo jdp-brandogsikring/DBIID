@@ -23,7 +23,7 @@ public static class RouteValidator
         foreach (var request in requests)
         {
             string route = request.Attribute.Route.ToLower();
-            string method = request.Attribute.Method.ToUpper();
+            HttpMethodType method = request.Attribute.Method;
             string key = $"{method}:{route}";
 
             if (!routeMap.ContainsKey(key))
@@ -32,7 +32,7 @@ public static class RouteValidator
             }
             else
             {
-                errors.Add($"Route conflict detected: The route [{method} {route}] is used by multiple request handlers: " +
+                errors.Add($"Route conflict detected: The route [{TranslateMethod(method)} {route}] is used by multiple request handlers: " +
                            $"{string.Join(", ", routeMap[key])} and {request.Type.Name}.");
             }
 
@@ -46,5 +46,17 @@ public static class RouteValidator
         }
 
         Console.WriteLine("All routes are unique and valid.");
+    }
+
+    public static string TranslateMethod(HttpMethodType method)
+    {
+        return method switch
+        {
+            HttpMethodType.GET => "GET",
+            HttpMethodType.POST => "POST",
+            HttpMethodType.PUT => "PUT",
+            HttpMethodType.DELETE => "DELETE",
+            _ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
+        };
     }
 }

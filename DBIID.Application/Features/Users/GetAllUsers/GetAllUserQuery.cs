@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DBIID.Application.Features.Users.GetAllUsers
 {
-    [HttpRequest("GET", "User/All")]
+    [HttpRequest(HttpMethodType.GET, "User/All")]
     public class GetAllUserQuery : IRequest<IEnumerable<UserDto>>
     {
     }

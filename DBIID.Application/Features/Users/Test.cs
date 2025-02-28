@@ -11,7 +11,7 @@ namespace DBIID.Application.Features.Users
 {
 
     // GET Request
-    [HttpRequest("GET", "User/Read/{id}")]
+    [HttpRequest(HttpMethodType.GET, "User/Read/{id}")]
     public class GetUserQuery : IRequest<UserDto>
     {
         public int Id { get; set; }
@@ -19,7 +19,7 @@ namespace DBIID.Application.Features.Users
 
 
     // POST Request
-    [HttpRequest("POST", "User/Create")]
+    [HttpRequest(HttpMethodType.POST, "User/Create")]
     public class CreateUserCommand : IRequest<UserDto>
     {
         public string Name { get; set; }
@@ -27,7 +27,7 @@ namespace DBIID.Application.Features.Users
     }
 
     // PUT Request
-    [HttpRequest("PUT", "User/Update/{id}")]
+    [HttpRequest(HttpMethodType.PUT, "User/Update/{id}")]
     public class UpdateUserCommand : IRequest<bool>
     {
         public int Id { get; set; }
@@ -35,7 +35,7 @@ namespace DBIID.Application.Features.Users
     }
 
     // DELETE Request
-    [HttpRequest("DELETE", "User/Delete/{id}")]
+    [HttpRequest(HttpMethodType.DELETE, "User/Delete/{id}")]
     public class DeleteUserCommand : IRequest<bool>
     {
         public int Id { get; set; }
@@ -43,7 +43,7 @@ namespace DBIID.Application.Features.Users
 
 
     // GET Request
-    [HttpRequest("GET", "Group/Read/{id}")]
+    [HttpRequest(HttpMethodType.GET, "Group/Read/{id}")]
     public class GetGroupQuery : IRequest<UserDto>
     {
         public int Id { get; set; }
@@ -51,7 +51,7 @@ namespace DBIID.Application.Features.Users
 
 
     // POST Request
-    [HttpRequest("POST", "Group/Create")]
+    [HttpRequest(HttpMethodType.POST, "Group/Create")]
     public class CreateGroupCommand : IRequest<UserDto>
     {
         public string Name { get; set; }
@@ -59,7 +59,7 @@ namespace DBIID.Application.Features.Users
     }
 
     // PUT Request
-    [HttpRequest("PUT", "Group/Update/{id}")]
+    [HttpRequest(HttpMethodType.PUT, "Group/Update/{id}")]
     public class UpdateGroupCommand : IRequest<bool>
     {
         public int Id { get; set; }
@@ -67,7 +67,7 @@ namespace DBIID.Application.Features.Users
     }
 
     // DELETE Request
-    [HttpRequest("DELETE", "Group/Delete/{id}")]
+    [HttpRequest(HttpMethodType.DELETE, "Group/Delete/{id}")]
     public class DeleteGroupCommand : IRequest<bool>
     {
         public int Id { get; set; }
