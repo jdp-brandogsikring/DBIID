@@ -1,4 +1,5 @@
 ﻿using DBIID.Application.Common.Attributes;
+using MediatR;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -8,11 +9,11 @@ using System.Reflection;
 
 public class IRequestSwaggerDocumentFilter : IDocumentFilter
 {
-    public Assembly _assembly { get; }
+    private readonly Assembly _assembly;
 
     public IRequestSwaggerDocumentFilter(Assembly assembly)
     {
-        _assembly = assembly;
+        _assembly = assembly; // Injected assembly reference
     }
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
@@ -29,17 +30,32 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
             var path = $"/api/{attr.Route}";
             var method = attr.Method.ToLower();
 
+            // 🔹 Extract response type from IRequest<TResponse>
+            var responseType = GetIRequestResponseType(requestType);
+
             var operation = new OpenApiOperation
             {
-                Summary = $"Dynamisk endpoint for {requestType.Name}",
+                Summary = $"Dynamically generated endpoint for {requestType.Name}",
                 Responses = new OpenApiResponses
                 {
-                    ["200"] = new OpenApiResponse { Description = "Success" }
+                    ["200"] = new OpenApiResponse
+                    {
+                        Description = "Success",
+                        Content = responseType != null ? new Dictionary<string, OpenApiMediaType>
+                        {
+                            ["application/json"] = new OpenApiMediaType
+                            {
+                                Schema = context.SchemaGenerator.GenerateSchema(responseType, context.SchemaRepository)
+                            }
+                        } : null
+                    },
+                    ["400"] = new OpenApiResponse { Description = "Bad Request" },
+                    ["404"] = new OpenApiResponse { Description = "Not Found" }
                 },
                 Parameters = new List<OpenApiParameter>()
             };
 
-            // 🔹 Håndter `{}`-parametre i URL'en og find deres datatype
+            // 🔹 Extract `{}` parameters from the route and match their types
             var paramNames = ExtractRouteParameters(attr.Route);
             var properties = requestType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                         .ToDictionary(p => p.Name.ToLower(), p => p);
@@ -61,7 +77,7 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
                 }
             }
 
-            // 🔹 Fjern request body for DELETE requests
+            // 🔹 Remove request body for GET and DELETE requests
             if (method != "get" && method != "delete")
             {
                 operation.RequestBody = new OpenApiRequestBody
@@ -104,12 +120,20 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
             .ToList();
     }
 
-    // 🔹 Konverter .NET datatyper til OpenAPI datatyper
     private static string GetOpenApiType(Type type)
     {
         return type == typeof(int) ? "integer" :
                type == typeof(bool) ? "boolean" :
                type == typeof(double) || type == typeof(float) ? "number" :
-               "string"; // Standard fallback
+               "string"; // Default fallback
+    }
+
+    // 🔹 Extract TResponse from IRequest<TResponse>
+    private static Type GetIRequestResponseType(Type requestType)
+    {
+        var interfaceType = requestType.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+
+        return interfaceType?.GetGenericArguments().FirstOrDefault();
     }
 }
