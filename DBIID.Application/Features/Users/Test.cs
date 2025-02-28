@@ -47,4 +47,12 @@ namespace DBIID.Application.Features.Users
     {
         public int Id { get; set; }
     }
+
+    // DELETE Request
+    [HttpRequest("DELETE", "User/Delete/{id}/{security}")]
+    public class DeleteUserasCommand : IRequest<bool>
+    {
+        public int Id { get; set; }
+        public string Security { get; set; }
+    }
 }

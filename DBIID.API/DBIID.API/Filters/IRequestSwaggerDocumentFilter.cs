@@ -61,8 +61,8 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
                 }
             }
 
-            // 🔹 Tilføj request body for POST/PUT, men IKKE for GET
-            if (method != "get")
+            // 🔹 Fjern request body for DELETE requests
+            if (method != "get" && method != "delete")
             {
                 operation.RequestBody = new OpenApiRequestBody
                 {

@@ -73,8 +73,8 @@ public class DynamicRestController : ControllerBase
             return BadRequest(new { errors });
         }
 
-        // 🔹 5️⃣ Map body-variabler, hvis ikke GET
-        if (Request.Method != "GET" && requestBody != null)
+        // 🔹 5️⃣ Kun map request-body, hvis IKKE DELETE
+        if (Request.Method != "GET" && Request.Method != "DELETE" && requestBody != null)
         {
             var bodyData = JsonSerializer.Deserialize(requestBody.ToString(), requestType);
             foreach (var prop in requestType.GetProperties())
