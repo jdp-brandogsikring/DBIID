@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-    using DBIID.Application.Common.Attributes;
-    using DBIID.Application.Common.Dtos;
-    using MediatR;
+using DBIID.Application.Shared.Attributes;
+using DBIID.Application.Shared.Dtos;
+using MediatR;
 
 namespace DBIID.Application.Features.Users
 {

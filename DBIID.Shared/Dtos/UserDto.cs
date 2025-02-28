@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DBIID.Application.Common.Dtos
+namespace DBIID.Application.Shared.Dtos
 {
     public class UserDto
     {

@@ -1,4 +1,4 @@
-﻿using DBIID.Application.Common.Attributes;
+﻿using DBIID.Application.Shared.Attributes;
 using MediatR;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;

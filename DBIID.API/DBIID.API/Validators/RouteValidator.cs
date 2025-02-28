@@ -1,4 +1,4 @@
-﻿using DBIID.Application.Common.Attributes;
+﻿using DBIID.Application.Shared.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

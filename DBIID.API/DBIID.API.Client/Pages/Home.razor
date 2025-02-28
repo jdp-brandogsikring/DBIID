@@ -1,7 +1,43 @@
 ﻿@page "/"
+@using DBIID.Application.Shared.Dtos
+@using DBIID.Shared.Features.Users
+
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+@foreach (var item in users)
+{
+    <p>@item.Id - @item.GivenName - @item.FamilyName</p>
+}
+
+@code{
+    [Inject]
+    private IApiRequestService apiRequestService { get; set; }
+
+    private List<UserDto> users = new List<UserDto>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try{
+                users = (await apiRequestService.SendAsync(new GetAllUserQuery())).ToList();
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            StateHasChanged();
+
+        }
+    }
+
+    override protected async Task OnInitializedAsync()
+    {
+
+    }
+
+}

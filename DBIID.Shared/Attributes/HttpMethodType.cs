@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DBIID.Application.Common.Attributes
+namespace DBIID.Application.Shared.Attributes
 {
     public enum HttpMethodType
     {

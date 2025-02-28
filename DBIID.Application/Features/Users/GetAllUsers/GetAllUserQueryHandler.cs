@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DBIID.Application.Common.Dtos;
+using DBIID.Application.Shared.Dtos;
 using DBIID.Application.Common.Handlers;
 using MediatR;
 using System;
@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DBIID.Shared.Features.Users;
 
 namespace DBIID.Application.Features.Users.GetAllUsers
 {

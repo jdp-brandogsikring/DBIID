@@ -11,7 +11,7 @@ namespace DBIID.Application
     {
         public AutoMapperProfil()
         {
-            CreateMap<Domain.Entities.User, Common.Dtos.UserDto>();
+            CreateMap<Domain.Entities.User, Shared.Dtos.UserDto>();
         }
     }
 }

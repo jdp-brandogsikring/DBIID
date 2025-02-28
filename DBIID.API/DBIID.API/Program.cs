@@ -30,6 +30,13 @@ builder.Services.AddAutoMapper();
 builder.Services.AddControllers();
 
 
+// Inject the Shared Assembly containing Commands & Queries
+var sharedAssembly = typeof(DBIID.Shared.AssemblyReference).Assembly;
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7128/api") });
+builder.Services.AddSingleton(sharedAssembly);
+builder.Services.AddScoped<IApiRequestService, ApiRequestService>();
+
+
 // Swagger-konfiguration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

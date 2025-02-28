@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using DBIID.Application.Common.Attributes;
+using DBIID.Application.Shared.Attributes;
 
 [ApiController]
 [Route("api")]
