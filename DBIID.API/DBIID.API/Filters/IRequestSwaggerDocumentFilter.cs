@@ -8,16 +8,16 @@ using System.Reflection;
 
 public class IRequestSwaggerDocumentFilter : IDocumentFilter
 {
+    public Assembly _assembly { get; }
+
+    public IRequestSwaggerDocumentFilter(Assembly assembly)
+    {
+        _assembly = assembly;
+    }
+
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
-        var assemblies = new List<Assembly>
-        {
-            Assembly.GetExecutingAssembly(),
-            typeof(DBIID.Application.AssemblyReference).Assembly
-        };
-
-        var requestTypes = assemblies
-            .SelectMany(a => a.GetTypes())
+        var requestTypes = _assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<HttpRequestAttribute>() != null)
             .ToList();
 

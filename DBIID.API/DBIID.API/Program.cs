@@ -11,6 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+// Inject the assembly reference dynamically
+var assemblyReference = typeof(DBIID.Application.AssemblyReference).Assembly;
+
+// Inject the assembly to DI for controller to use  
+builder.Services.AddSingleton(assemblyReference);
+
+// Validate routes using the injected assembly reference
+RouteValidator.ValidateRoutes(assemblyReference); // Throws an exception if conflicts are found!
+
+
 string dbConnectionString = builder.Configuration.GetValue<string>("ConnectionStrings:DefaultConnection");
 builder.Services.AddDbContext(dbConnectionString);
 builder.Services.AddRepositories();

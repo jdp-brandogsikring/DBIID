@@ -55,4 +55,16 @@ namespace DBIID.Application.Features.Users
         public int Id { get; set; }
         public string Security { get; set; }
     }
+
+
+
+    //[HttpRequest("GET", "User/Read/{id}")]
+    //public class GetUserDuplicateQuery : IRequest<UserDto>
+    //{
+    //    public int Id { get; set; }
+    //}
+
+
+    //[HttpRequest("POST", "User/Create")]
+    //public class CreateUserDuplicateCommand : IRequest<bool> { }
 }

@@ -15,10 +15,12 @@ using DBIID.Application.Common.Attributes;
 public class DynamicRestController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly Assembly _assembly;
 
-    public DynamicRestController(IMediator mediator)
+    public DynamicRestController(IMediator mediator, Assembly assembly)
     {
         _mediator = mediator;
+        _assembly = assembly; // Injected assembly reference
     }
 
     [HttpGet, HttpPost, HttpPut, HttpDelete]
@@ -88,10 +90,10 @@ public class DynamicRestController : ControllerBase
         return response != null ? Ok(response) : NoContent();
     }
 
-    private static Type FindRequestType(string url, string method)
+    private Type FindRequestType(string url, string method)
     {
-        var assembly = typeof(DBIID.Application.AssemblyReference).Assembly;
-        var allRequests = assembly.GetTypes()
+
+        var allRequests = _assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<HttpRequestAttribute>() != null)
             .Select(t => new
             {
