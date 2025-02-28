@@ -39,20 +39,29 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
                 Parameters = new List<OpenApiParameter>()
             };
 
-            // ✅ Håndter `{}`-parametre i URL'en
+            // 🔹 Håndter `{}`-parametre i URL'en og find deres datatype
             var paramNames = ExtractRouteParameters(attr.Route);
+            var properties = requestType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                        .ToDictionary(p => p.Name.ToLower(), p => p);
+
             foreach (var param in paramNames)
             {
-                operation.Parameters.Add(new OpenApiParameter
+                string paramLower = param.ToLower();
+                if (properties.ContainsKey(paramLower))
                 {
-                    Name = param,
-                    In = ParameterLocation.Path,
-                    Required = true,
-                    Schema = new OpenApiSchema { Type = "string" }
-                });
+                    var prop = properties[paramLower];
+
+                    operation.Parameters.Add(new OpenApiParameter
+                    {
+                        Name = param,
+                        In = ParameterLocation.Path,
+                        Required = true,
+                        Schema = new OpenApiSchema { Type = GetOpenApiType(prop.PropertyType) }
+                    });
+                }
             }
 
-            // ✅ Tilføj request body for POST/PUT, men IKKE for GET
+            // 🔹 Tilføj request body for POST/PUT, men IKKE for GET
             if (method != "get")
             {
                 operation.RequestBody = new OpenApiRequestBody
@@ -90,9 +99,17 @@ public class IRequestSwaggerDocumentFilter : IDocumentFilter
 
     private static List<string> ExtractRouteParameters(string route)
     {
-        return route.Split('/')
-            .Where(part => part.StartsWith("{") && part.EndsWith("}"))
-            .Select(part => part.Trim('{', '}'))
+        return System.Text.RegularExpressions.Regex.Matches(route, @"{(\w+)}")
+            .Select(m => m.Groups[1].Value)
             .ToList();
+    }
+
+    // 🔹 Konverter .NET datatyper til OpenAPI datatyper
+    private static string GetOpenApiType(Type type)
+    {
+        return type == typeof(int) ? "integer" :
+               type == typeof(bool) ? "boolean" :
+               type == typeof(double) || type == typeof(float) ? "number" :
+               "string"; // Standard fallback
     }
 }
