@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DBIID.Application.Common.Handlers;
 using DBIID.Application.Shared.Dtos;
+using DBIID.Shared.Features.Users;
 using DBIID.Shared.Results;
 using System;
 using System.Collections.Generic;

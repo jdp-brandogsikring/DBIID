@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Components.Authorization;
+using MediatR;
+using DBIID.Application.Features.Users;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +33,16 @@ builder.Services.AddDbContext(dbConnectionString);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddAutoMapper();
+
+// ✅ Automatisk registrering af alle FluentValidation validators i projektet
+builder.Services.AddValidatorsFromAssemblyContaining<DBIID.Shared.AssemblyReference>();
+
+// ✅ MediatR med FluentValidation Pipeline
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<DBIID.Shared.AssemblyReference>());
+
+// ✅ Tilføj MediatR valideringspipeline
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 
 builder.Services.AddControllers();
 
@@ -152,6 +165,8 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
     c.RoutePrefix = "swagger"; // Sørger for at Swagger UI kun er på /swagger
 });
+
+app.UseMiddleware<ValidationExceptionMiddleware>();
 
 app.UseAuthentication(); // First, check authentication
 app.UseAuthorization();  // Then, enforce authorization

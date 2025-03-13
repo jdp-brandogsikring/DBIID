@@ -11,7 +11,8 @@ namespace DBIID.Shared.Results
         Success,
         Error,
         Warning,
-        Info
+        Info,
+        ValidationError
 
     }
 }

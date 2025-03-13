@@ -59,5 +59,16 @@ namespace DBIID.Shared.Results
                 Message = message
             };
         }
+
+        public static Result ValidationError(string errors)
+        {
+            return new Result()
+            {
+                IsSuccess = false,
+                Status = ResultStatus.ValidationError,
+                Message = errors,
+                ShowNotification = false
+            };
+        }
     }
 }
