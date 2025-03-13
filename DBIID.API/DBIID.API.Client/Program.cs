@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using FluentValidation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -14,5 +15,9 @@ builder.Services.AddScoped<IApiRequestService, ApiRequestService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+
+// ✅ Registrér alle validators
+builder.Services.AddValidatorsFromAssemblyContaining<DBIID.Shared.AssemblyReference>();
+
 
 await builder.Build().RunAsync();

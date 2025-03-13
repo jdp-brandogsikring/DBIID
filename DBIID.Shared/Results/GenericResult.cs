@@ -29,6 +29,17 @@ namespace DBIID.Shared.Results
             };
         }
 
+        public static Result<TValue> Success()
+        {
+            return new Result<TValue>()
+            {
+                IsSuccess = true,
+                Status = ResultStatus.Success,
+                Message = string.Empty,
+                ShowNotification = false
+            };
+        }
+
         public static Result<TValue> Error(string message)
         {
             return new Result<TValue>()
@@ -59,6 +70,17 @@ namespace DBIID.Shared.Results
                 Status = ResultStatus.Info,
                 Message = message,
                 ShowNotification = true,
+            };
+        }
+
+        public static Result ValidationError(string errors)
+        {
+            return new Result<TValue>()
+            {
+                IsSuccess = false,
+                Status = ResultStatus.ValidationError,
+                Message = errors,
+                ShowNotification = false,
             };
         }
     }

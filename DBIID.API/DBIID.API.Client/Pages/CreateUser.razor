@@ -1,0 +1,37 @@
+﻿@attribute [Route(RoutePaths.User.Create)]
+@using DBIID.Application.Shared.Dtos
+@using DBIID.Shared.Features.Users
+@inject IApiRequestService ApiRequestService
+
+<h3>Create User</h3>
+
+<input @bind="user.GivenName" placeholder="Fornavn" />
+<input @bind="user.FamilyName" placeholder="Efternavn" />
+
+<button @onclick="OnCreateUser">Create</button>
+
+@if (!string.IsNullOrEmpty(validationMessage))
+{
+    <p style="color:red">@validationMessage</p>
+}
+
+@code {
+    private CreateUserCommand user = new();
+    private string validationMessage;
+
+    private async Task OnCreateUser()
+    {
+        validationMessage = string.Empty;
+
+        var response = await ApiRequestService.SendAsync(user);
+
+        if (!response.IsSuccess)
+        {
+            validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+        }
+        else
+        {
+            Console.WriteLine("User created successfully!");
+        }
+    }
+}

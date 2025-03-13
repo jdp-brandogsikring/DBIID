@@ -11,13 +11,6 @@ using MediatR;
 namespace DBIID.Application.Features.Users
 {
 
-    // POST Request
-    [HttpRequest(HttpMethodType.POST, "User/Create")]
-    public class CreateUserCommand : IRequest<UserDto>
-    {
-        public string Name { get; set; }
-        public string Email { get; set; }
-    }
 
     // PUT Request
     [HttpRequest(HttpMethodType.PUT, "User/Update/{id}")]

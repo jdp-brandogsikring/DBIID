@@ -32,8 +32,6 @@ public class ValidationExceptionMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-        //var t = Result.ValidationError(JsonSerializer.Serialize(exception.Errors));
-
         var response = new
         {
             IsSuccess = false,
@@ -42,7 +40,6 @@ public class ValidationExceptionMiddleware
             ShowNotification = false
         };
 
-        //return context.Response.WriteAsync(JsonSerializer.Serialize(response));
         return context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }
