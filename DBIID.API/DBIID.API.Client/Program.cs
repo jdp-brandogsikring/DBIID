@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using FluentValidation;
+using DBI.DIGI.Components;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -19,5 +20,7 @@ builder.Services.AddScoped<JwtAuthenticationStateProvider>();
 // ✅ Registrér alle validators
 builder.Services.AddValidatorsFromAssemblyContaining<DBIID.Shared.AssemblyReference>();
 
+// DIGI Design
+builder.Services.RegisterDependencies();
 
 await builder.Build().RunAsync();

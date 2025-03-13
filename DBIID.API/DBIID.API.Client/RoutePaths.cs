@@ -1,7 +1,7 @@
 ﻿public static class RoutePaths
 {
     public const string Home = "/";
-    public const string Counter = "/counter";
+    public const string Login = "/login";
     public const string Weather = "/weather";
 
     public static class User

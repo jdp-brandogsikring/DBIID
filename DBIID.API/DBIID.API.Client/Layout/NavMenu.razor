@@ -1,36 +1,20 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">DBIID.API</a>
-    </div>
-</div>
+﻿
+@using DBI.DIGI.Components.Navigation
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="@RoutePaths.Home" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+<Nav>
+    <TopContent>
+        <DBI.DIGI.Components.Navigation.NavItemSingle Param="@RoutePaths.Home" IconClass="fa-light fa-building-magnifying-glass" Text="Home" />
+        <DBI.DIGI.Components.Navigation.NavItemSingle Param="@RoutePaths.Login" IconClass="fa-light fa-building-magnifying-glass" Text="Counter" />
+        <DBI.DIGI.Components.Navigation.NavItemSingle Param="@RoutePaths.Weather" IconClass="fa-light fa-building-magnifying-glass" Text="Weather" />
+        <DBI.DIGI.Components.Navigation.NavItemSingle Param="@RoutePaths.User.Create" IconClass="fa-light fa-building-magnifying-glass" Text="Opret user" />
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="@RoutePaths.Counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+    </TopContent>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="@RoutePaths.Weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="@RoutePaths.User.Create">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Opret
-            </NavLink>
-        </div>
-    </nav>
-</div>
+</Nav>
 
+
+@code {
+
+}

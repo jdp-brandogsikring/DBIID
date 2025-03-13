@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MediatR;
 using DBIID.Application.Features.Users;
 using FluentValidation;
+using DBI.DIGI.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -123,6 +124,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<JwtService>();
+
+// DIGI Design
+builder.Services.RegisterDependencies();
 
 var app = builder.Build();
 

@@ -1,0 +1,19 @@
+
+.mit-dbi-logo {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: .4rem;
+    margin: 0 1rem;
+    font-size: 20px;
+    color: var(--color-on-primary-dark);
+}
+
+h3 {
+    font-weight: var(--fw-400);
+}
+
+i {
+    font-size: 2rem;
+}
+

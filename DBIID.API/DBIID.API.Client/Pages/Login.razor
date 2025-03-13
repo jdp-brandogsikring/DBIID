@@ -1,0 +1,74 @@
+﻿@attribute [Route(RoutePaths.Login)]
+@layout BaseLayout
+@using DBI.DIGI.Components.Atoms.InputAtoms
+@using DBI.DIGI.Components.Toast
+@using DBIID.API.Client.Layout
+@inject HttpClient Http
+@inject JwtAuthenticationStateProvider AuthStateProvider
+@inject IToastService toastService
+
+<div class="main-area">
+<div class="login-container">
+    <div class="login-container-header">
+        <i class="fa-light fa-shield-keyhole"></i>
+        <h3>
+            <strong>DBI-iD</strong>
+        </h3>
+
+    </div>
+    <div class="login-container-body">
+
+@*     <DBI.DIGI.Components.Inputs.InputAndLabel>
+        <LabelTitle>
+            E-mail
+        </LabelTitle>
+    </DBI.DIGI.Components.Inputs.InputAndLabel>
+
+            <DBI.DIGI.Components.Inputs.InputAndLabel>
+                <LabelTitle>
+                    Adgangskode
+                </LabelTitle>
+            </DBI.DIGI.Components.Inputs.InputAndLabel> *@
+
+            <label>E-mail</label>
+    <TextInput @bind-Input="email" />
+
+            <label>Adgangskode</label>
+    <TextInput @bind-Input="password" />
+
+        <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" Size="DBI.DIGI.Components.ButtonSize.FullWidth" OnClick="OnLogin" Title="Log ind"></DBI.DIGI.Components.Button>
+    </div>
+
+</div>
+</div>
+
+@code {
+    private string email = "admin@example.com";
+    private string password = "password";
+
+    private async Task OnLogin()
+    {
+        var response = await Http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            string token = json["token"];
+            await AuthStateProvider.SetToken(token);
+            toastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Success,
+                    Title = "Du er nu logget ind"
+                });
+        }
+        else
+        {
+            toastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Du kunne ikke logges ind"
+                });
+        }
+    }
+}
