@@ -7,7 +7,7 @@
 }
 
 .login-container {
-    max-width: 20rem;
+    width: 20rem;
 }
 
 .login-container-header {
@@ -20,6 +20,9 @@
     background-color: var(--color-primary-dark);
     border-radius: 1rem 1rem 0 0;
     padding: .5rem;
+    font-weight: 600;
+    font-size: 1.5rem;
+    padding-left: 1rem;
 }
 
 h3 {
@@ -35,4 +38,5 @@ i {
     padding: 1rem;
     border-radius: 0 0rem 1rem 1rem;
     background: var(--color-default-dark-25);
+    height: 25rem;
 }

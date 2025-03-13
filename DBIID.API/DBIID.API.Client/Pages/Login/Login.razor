@@ -1,46 +1,22 @@
-﻿@attribute [Route(RoutePaths.Login)]
-@layout BaseLayout
+﻿@attribute [Route(RoutePaths.Login.Base)]
+@layout LoginLayout
 @using DBI.DIGI.Components.Atoms.InputAtoms
 @using DBI.DIGI.Components.Toast
 @using DBIID.API.Client.Layout
 @inject HttpClient Http
 @inject JwtAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager navigationManager
 @inject IToastService toastService
 
-<div class="main-area">
-<div class="login-container">
-    <div class="login-container-header">
-        <i class="fa-light fa-shield-keyhole"></i>
-        <h3>
-            <strong>DBI-iD</strong>
-        </h3>
 
-    </div>
-    <div class="login-container-body">
+<label>E-mail</label>
+<TextInput @bind-Input="email" />
 
-@*     <DBI.DIGI.Components.Inputs.InputAndLabel>
-        <LabelTitle>
-            E-mail
-        </LabelTitle>
-    </DBI.DIGI.Components.Inputs.InputAndLabel>
+<label>Adgangskode</label>
+<TextInput @bind-Input="password" />
 
-            <DBI.DIGI.Components.Inputs.InputAndLabel>
-                <LabelTitle>
-                    Adgangskode
-                </LabelTitle>
-            </DBI.DIGI.Components.Inputs.InputAndLabel> *@
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" Size="DBI.DIGI.Components.ButtonSize.FullWidth" OnClick="OnLogin" Title="Log ind"></DBI.DIGI.Components.Button>
 
-            <label>E-mail</label>
-    <TextInput @bind-Input="email" />
-
-            <label>Adgangskode</label>
-    <TextInput @bind-Input="password" />
-
-        <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" Size="DBI.DIGI.Components.ButtonSize.FullWidth" OnClick="OnLogin" Title="Log ind"></DBI.DIGI.Components.Button>
-    </div>
-
-</div>
-</div>
 
 @code {
     private string email = "admin@example.com";
@@ -60,6 +36,8 @@
                     Status = ToastStatus.Success,
                     Title = "Du er nu logget ind"
                 });
+
+            navigationManager.NavigateTo(RoutePaths.Login.MFA);
         }
         else
         {

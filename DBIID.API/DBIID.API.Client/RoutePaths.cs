@@ -1,8 +1,13 @@
 ﻿public static class RoutePaths
 {
     public const string Home = "/";
-    public const string Login = "/login";
     public const string Weather = "/weather";
+
+    public static class Login
+    {
+        public const string Base = "/login";
+        public const string MFA = $"{Base}/MFA";
+    }
 
     public static class User
     {
