@@ -1,20 +1,25 @@
 ﻿@attribute [Route(RoutePaths.Counter)]
+@inject HttpClient Http
+@inject JwtAuthenticationStateProvider AuthStateProvider
 
+<h3>Login</h3>
 
-
-<PageTitle>Counter</PageTitle>
-
-<h1>Counter</h1>
-
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<input @bind="email" placeholder="Email" />
+<input @bind="password" type="password" placeholder="Password" />
+<button @onclick="Login">Login</button>
 
 @code {
-    private int currentCount = 0;
+    private string email = "";
+    private string password = "";
 
-    private void IncrementCount()
+    private async Task Login()
     {
-        currentCount++;
+        var response = await Http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            string token = json["token"];
+            await AuthStateProvider.SetToken(token);
+        }
     }
 }

@@ -1,9 +1,13 @@
-using DBIID.API.Client.Pages;
+﻿using DBIID.API.Client.Pages;
 using DBIID.API.Components;
 using DBIID.Application;
 using DBIID.Infrastructure;
 using DBIID.Application;
 using DBIID.Domain;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +39,10 @@ var sharedAssembly = typeof(DBIID.Shared.AssemblyReference).Assembly;
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7128/api") });
 builder.Services.AddSingleton(sharedAssembly);
 builder.Services.AddScoped<IApiRequestService, ApiRequestService>();
+// Register Authentication State Provider
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
+builder.Services.AddScoped<JwtAuthenticationStateProvider>();
 
 
 // Swagger-konfiguration
@@ -50,7 +58,73 @@ builder.Services.AddSwaggerGen(options =>
     options.DocumentFilter<RequestSwaggerDocumentFilter>();
 });
 
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var jwtKey = jwtSettings["Key"];
+var jwtIssuer = jwtSettings["Issuer"];
+var jwtAudience = jwtSettings["Audience"];
+
+if (string.IsNullOrEmpty(jwtKey) || jwtKey.Length < 32)
+{
+    throw new Exception("JWT Key must be at least 32 characters long.");
+}
+
+// ✅ Ensure Correct JWT Validation
+var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = signingKey
+        };
+
+        // ✅ Log Authentication Failures
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"🔴 Authentication Failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Console.WriteLine($"🔴 JWT Challenge Triggered: {context.Error}, {context.ErrorDescription}");
+                return Task.CompletedTask;
+            },
+            OnForbidden = context =>
+            {
+                Console.WriteLine($"🔴 JWT Forbidden: {context.HttpContext.User.Identity?.Name} is not allowed.");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+builder.Services.AddSingleton<JwtService>();
+
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Authentication Error: {ex.Message}");
+        throw;
+    }
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -71,18 +145,23 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAntiforgery();
 
-// Swagger UI kun p� /swagger
+// Swagger UI kun på /swagger
 app.UseSwagger(c => c.RouteTemplate = "swagger/{documentName}/swagger.json");
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = "swagger"; // S�rger for at Swagger UI kun er p� /swagger
+    c.RoutePrefix = "swagger"; // Sørger for at Swagger UI kun er på /swagger
 });
+
+app.UseAuthentication(); // First, check authentication
+app.UseAuthorization();  // Then, enforce authorization
 
 app.MapControllers();
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(DBIID.API.Client._Imports).Assembly);
+
+
 
 app.Run();

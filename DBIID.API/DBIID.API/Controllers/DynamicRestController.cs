@@ -8,9 +8,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using DBIID.Application.Shared.Attributes;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api")]
+[Authorize]
 [ApiExplorerSettings(IgnoreApi = true)] // ✅ Skjuler denne controller fra Swagger
 public class DynamicRestController : ControllerBase
 {
