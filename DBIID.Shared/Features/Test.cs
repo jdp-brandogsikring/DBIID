@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DBIID.Application.Shared.Attributes;
 using DBIID.Application.Shared.Dtos;
+using DBIID.Shared.Results;
 using MediatR;
 
 namespace DBIID.Application.Features.Users
@@ -12,7 +13,7 @@ namespace DBIID.Application.Features.Users
 
     // GET Request
     [HttpRequest(HttpMethodType.GET, "User/Read/{id}")]
-    public class GetUserQuery : IRequest<UserDto>
+    public class GetUserQuery : IRequest<Result<UserDto>>
     {
         public int Id { get; set; }
     }
@@ -58,6 +59,14 @@ namespace DBIID.Application.Features.Users
         public string Email { get; set; }
     }
 
+    // POST Request
+    [HttpRequest(HttpMethodType.POST, "Group/Create")]
+    public class CreatesGroupCommand : IRequest<UserDto>
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
+
     // PUT Request
     [HttpRequest(HttpMethodType.PUT, "Group/Update/{id}")]
     public class UpdateGroupCommand : IRequest<bool>
@@ -72,5 +81,6 @@ namespace DBIID.Application.Features.Users
     {
         public int Id { get; set; }
     }
+
 
 }

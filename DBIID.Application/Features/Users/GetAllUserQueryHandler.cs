@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using DBIID.Shared.Features.Users;
 using DBIID.Shared.Results;
 
-namespace DBIID.Application.Features.Users.GetAllUsers
+namespace DBIID.Application.Features.Users
 {
     internal class GetAllUserQueryHandler : IQueryHandler<GetAllUserQuery, Result<IEnumerable<UserDto>>>
     {
