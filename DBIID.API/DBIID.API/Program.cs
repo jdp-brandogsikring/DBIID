@@ -12,6 +12,7 @@ using MediatR;
 using DBIID.Application.Features.Users;
 using FluentValidation;
 using DBI.DIGI.Components;
+using Blazored.LocalStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,9 +55,11 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 builder.Services.AddSingleton(sharedAssembly);
 builder.Services.AddScoped<IApiRequestService, ApiRequestService>();
 // Register Authentication State Provider
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthStartupService>();
 
 
 // Swagger-konfiguration

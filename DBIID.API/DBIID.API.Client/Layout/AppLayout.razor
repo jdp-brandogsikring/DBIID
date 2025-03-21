@@ -5,65 +5,81 @@
 @using DBI.DIGI.Components.Layouts
 @using DBI.DIGI.Components.Navigation
 @using DBI.DIGI.Components.Icon
+@using Microsoft.AspNetCore.Components.Authorization
+@inject JwtAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
+<DigiLayout>
+    <TopBar>
+        <TopBar >
 
-        <DigiLayout>
-            <TopBar>
-                <TopBar >
-                 
-                        <Logo>
-                            <div class="mit-dbi-logo">
-                                <i class="fa-light fa-shield-keyhole"></i>
-                                <h3>
-                                    <strong>DBI-iD</strong>
-                                </h3>
-                            </div>
-                        </Logo>
-                        <TopBarLinks>
-                           
-                            
-                            
-                            <IconContainer ShowText="true" Size="IconContainer.IconSize.XL">
+            <Logo>
+                <div class="mit-dbi-logo">
+                    <i class="fa-light fa-shield-keyhole"></i>
+                    <h3>
+                        <strong>DBI-iD</strong>
+                    </h3>
+                </div>
+            </Logo>
+            <TopBarLinks>
+
+                <AuthorizeView>
+                    <Authorizing>
+                        <p>⏳ Indlæser...</p>
+                    </Authorizing>
+                    <Authorized>
+                        <p>✅ Du er logget ind</p>
+                    </Authorized>
+                    <NotAuthorized>
+                        <p>❌ Ikke logget ind</p>
+                    </NotAuthorized>
+                </AuthorizeView>
+
+                @*                             <IconContainer ShowText="true" Size="IconContainer.IconSize.XL">
                                 <Icon><i class="fas fa-light fa-bell"></i> </Icon>
                                 <Text> Beskeder </Text>
                             </IconContainer>
-                            
+
                             <IconContainer ShowText="true" Size="IconContainer.IconSize.XL" >
                                 <Icon><i class="fas fa-light fa-user"></i> </Icon> 
                                 <Text > Profil </Text>
                             </IconContainer>
-                            
+
                             <IconContainer ShowText="true" Size="IconContainer.IconSize.XL">
                                 <Icon><i class="fas fa-light fa-cog"></i> </Icon>
                                 <Text> Indstillinger </Text>
-                            </IconContainer>
-                            
-                            <IconContainer ShowText="true" Size="IconContainer.IconSize.XL">
-                                <Icon><i class="fas fa-light fa-sign-out"></i> </Icon>
-                                <Text> Log ud </Text>
-                            </IconContainer>
-                          
-                           
-                            
-                        </TopBarLinks>
-                  
-                </TopBar> 
-            </TopBar>
-            <Navigation>
-            
-                <NavMenu></NavMenu>
-            </Navigation>
-            <Body>
-            @Body
-            </Body>
-            <Toast>
-                <RootToastComponent></RootToastComponent>
-            </Toast>
-        </DigiLayout>        
+                            </IconContainer> *@
+
+                <IconContainer OnClick="OnLogout" ShowText="true" Size="IconContainer.IconSize.XL">
+                    <Icon><i class="fas fa-light fa-sign-out"></i> </Icon>
+                    <Text> Log ud </Text>
+                </IconContainer>
+
+
+
+            </TopBarLinks>
+
+        </TopBar> 
+    </TopBar>
+    <Navigation>
+
+        <NavMenu></NavMenu>
+    </Navigation>
+    <Body>
+        @Body
+    </Body>
+    <Toast>
+        <RootToastComponent></RootToastComponent>
+    </Toast>
+</DigiLayout>        
 
 
 @code{
 
-  
 
+    private async void OnLogout()
+    {
+        await AuthStateProvider.RemoveToken();
+        NavigationManager.NavigateTo(RoutePaths.Login.Base);
+    }
 }

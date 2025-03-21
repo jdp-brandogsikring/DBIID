@@ -9,11 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="DBI.DIGI.Components" Version="20250313.3.0" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.14" />
   </ItemGroup>
 
   <ItemGroup>

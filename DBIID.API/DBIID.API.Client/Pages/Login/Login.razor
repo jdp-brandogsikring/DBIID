@@ -2,7 +2,9 @@
 @layout LoginLayout
 @using DBI.DIGI.Components.Atoms.InputAtoms
 @using DBI.DIGI.Components.Toast
+@using DBIID.API.Client.Extensions
 @using DBIID.API.Client.Layout
+@using Microsoft.AspNetCore.Components.WebAssembly;
 @inject HttpClient Http
 @inject JwtAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager navigationManager
@@ -22,6 +24,14 @@
     private string email = "jdp@brandogsikring.dk";
     private string password = "test";
 
+    string returnUrl;
+
+    protected override void OnInitialized()
+    {
+        returnUrl = navigationManager.GetQueryParameter("returnUrl") ?? "/";
+
+    }
+
     private async Task OnLogin()
     {
         var response = await Http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
@@ -37,7 +47,15 @@
                     Title = "Du er nu logget ind"
                 });
 
-            navigationManager.NavigateTo(RoutePaths.Home);
+            if (string.IsNullOrWhiteSpace(returnUrl))
+            {
+                navigationManager.NavigateTo(RoutePaths.Home);
+            }
+            else
+            {
+                // Efter login
+                navigationManager.NavigateTo(returnUrl);
+            }
         }
         else
         {

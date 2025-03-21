@@ -13,18 +13,24 @@ using DBIID.Shared.Results;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 public class ApiRequestService : IApiRequestService
 {
     private readonly HttpClient _httpClient;
     private readonly IServiceProvider _serviceProvider;
+    private readonly NavigationManager _navigation;
+    private readonly AuthStartupService _authStartup;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public ApiRequestService(HttpClient httpClient, IServiceProvider serviceProvider)
+    public ApiRequestService(HttpClient httpClient, IServiceProvider serviceProvider, 
+                        NavigationManager navigationManager, AuthStartupService authStartup)
     {
         _httpClient = httpClient;
         this._serviceProvider = serviceProvider;
+        this._navigation = navigationManager;
+        this._authStartup = authStartup;
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
@@ -34,6 +40,8 @@ public class ApiRequestService : IApiRequestService
     /// </summary>
     public async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
+        await _authStartup.Initialization; // ✅ vent på auth (engang)
+
         var validationResult = await ValidateRequest(request);
         if (!validationResult.IsSuccess)
         {
@@ -138,12 +146,23 @@ public class ApiRequestService : IApiRequestService
     /// </summary>
     private async Task<TResponse> HandleResponse<TResponse>(HttpResponseMessage response)
     {
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            // ✅ Send brugeren til login med returnUrl
+            var returnUrl = Uri.EscapeDataString(_navigation.Uri.Replace(_navigation.BaseUri, "/"));
+            _navigation.NavigateTo($"/login?returnUrl={returnUrl}", forceLoad: true);
+
+            // Stop yderligere behandling
+            return default!;
+        }
+
         if (!response.IsSuccessStatusCode)
         {
             string errorContent = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error: {response.StatusCode}\n{errorContent}");
         }
 
-        return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions) ?? throw new Exception("Invalid response format.");
+        return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions)
+               ?? throw new Exception("Invalid response format.");
     }
 }

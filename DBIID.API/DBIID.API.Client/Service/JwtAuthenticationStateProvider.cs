@@ -1,51 +1,92 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 
 public class JwtAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient;
+    private readonly ILocalStorageService _localStorage;
+    private const string TokenKey = "authToken";
     private string _token;
 
-    public JwtAuthenticationStateProvider(HttpClient httpClient)
+    public JwtAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
     {
         _httpClient = httpClient;
+        _localStorage = localStorage;
     }
 
     public async Task SetToken(string token)
     {
-        if (string.IsNullOrEmpty(token))
-        {
-            Console.WriteLine("❌ Token is empty!");
-            return;
-        }
-
         _token = token;
+
+        await _localStorage.SetItemAsync(TokenKey, token);
+
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
+    public async Task RemoveToken()
+    {
+        _token = null;
+        await _localStorage.RemoveItemAsync(TokenKey);
+        _httpClient.DefaultRequestHeaders.Authorization = null;
+
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+    }
+
+    public Task Initialization => _initializationTcs.Task;
+
+    private readonly TaskCompletionSource<bool> _initializationTcs = new();
+
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        if (string.IsNullOrEmpty(_token))
+        var anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+
+        if (!OperatingSystem.IsBrowser())
         {
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            // ⚠️ Gør intet – browseren håndterer det senere
+            return anonymous;
         }
 
-        var claims = ParseClaimsFromJwt(_token);
-        var identity = new ClaimsIdentity(claims, "jwt");
-        var user = new ClaimsPrincipal(identity);
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_token))
+            {
+                _token = await _localStorage.GetItemAsync<string>(TokenKey);
+            }
 
-        return new AuthenticationState(user);
+            if (!string.IsNullOrWhiteSpace(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            }
+
+            var claims = string.IsNullOrWhiteSpace(_token)
+                ? Array.Empty<Claim>()
+                : ParseClaimsFromJwt(_token);
+
+            var identity = new ClaimsIdentity(claims, string.IsNullOrWhiteSpace(_token) ? null : "jwt");
+            return new AuthenticationState(new ClaimsPrincipal(identity));
+        }
+        finally
+        {
+            // ✅ KUN her signalerer vi at initialization er færdig – uanset om token var fundet
+            _initializationTcs.TrySetResult(true);
+        }
     }
 
     private IEnumerable<Claim> ParseClaimsFromJwt(string token)
     {
         var payload = token.Split('.')[1];
+
+        // Fix padding
+        payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+
         var jsonBytes = Convert.FromBase64String(payload);
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
+
         return keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()));
     }
 }

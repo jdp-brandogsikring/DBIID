@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using FluentValidation;
 using DBI.DIGI.Components;
+using Blazored.LocalStorage;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -13,9 +14,11 @@ builder.Services.AddSingleton(sharedAssembly);
 builder.Services.AddScoped<IApiRequestService, ApiRequestService>();
 
 // Register Authentication State Provider
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthStartupService>();
 
 // ✅ Registrér alle validators
 builder.Services.AddValidatorsFromAssemblyContaining<DBIID.Shared.AssemblyReference>();
