@@ -1,27 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DBIID.Application.Features.Auth.Login;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 [Route("api/auth")]
 [ApiController]
 public class AuthController : ControllerBase
 {
     private readonly JwtService _jwtService;
+    private readonly IMediator mediator;
 
-    public AuthController(JwtService jwtService)
+    public AuthController(JwtService jwtService, IMediator mediator)
     {
         _jwtService = jwtService;
+        this.mediator = mediator;
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        if (model.Email == "admin@example.com" && model.Password == "password")
-        {
-            string token = _jwtService.GenerateToken("1", model.Email, "Admin");
 
-            Console.WriteLine($"✅ Generated JWT Token: {token}"); // ✅ Log token
-            return Ok(new { Token = token });
+        var result = await mediator.Send(new LoginCommand()
+        {
+            Email = model.Email,
+            Password = model.Password
+        });
+
+        if (!result.IsSuccess)
+        {
+            return Unauthorized(result.Message);
         }
-        return Unauthorized("Invalid credentials.");
+
+        string token = _jwtService.GenerateToken(result.Value.UserId.ToString(), result.Value.Email, "Admin");
+
+        return Ok(new { Token = token });
+
     }
 }
 

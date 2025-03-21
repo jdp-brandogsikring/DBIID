@@ -45,7 +45,8 @@ namespace DBIID.Application.Features.Auth.Login
 
             return Result<LoginResult>.Success(new LoginResult
             {
-            
+                 UserId = user.Id,
+                 Email = user.Email
             });
         }
     }

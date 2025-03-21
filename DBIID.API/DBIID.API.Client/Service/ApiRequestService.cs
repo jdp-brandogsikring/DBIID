@@ -56,7 +56,11 @@ public class ApiRequestService : IApiRequestService
         if (httpMethod == HttpMethod.Post || httpMethod == HttpMethod.Put)
         {
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(request);
+
+#if DEBUG
             Console.WriteLine("📦 Request JSON: " + json); // Debug
+
+#endif
             httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
         }
 

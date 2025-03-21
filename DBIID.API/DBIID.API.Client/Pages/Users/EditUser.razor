@@ -10,7 +10,15 @@
 <input @bind="user.FamilyName" placeholder="Efternavn" />
 <input @bind="user.Email" placeholder="Email" />
 
-<button @onclick="OnUpdateUser">Create</button>
+
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnUpdateUser" Title="Opdater bruger"></DBI.DIGI.Components.Button>
+
+<br />
+<br />
+
+<input @bind="resetPasswordCommand.Password" placeholder="Adgangskode" />
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Sec" OnClick="OnResetPassword" Title="Nulstil adgangskode"></DBI.DIGI.Components.Button>
+
 
 @if (!string.IsNullOrEmpty(validationMessage))
 {
@@ -28,6 +36,8 @@
     private UpdateUserCommand user = new();
     private string validationMessage;
 
+    private ResetPasswordCommand resetPasswordCommand = new();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -44,6 +54,29 @@
                     };
                 StateHasChanged();
             }
+        }
+    }
+
+    private async Task OnResetPassword()
+    {
+        validationMessage = string.Empty;
+
+        resetPasswordCommand.UserId = UserId;
+
+        var response = await ApiRequestService.SendAsync(resetPasswordCommand);
+        if (!response.IsSuccess)
+        {
+            validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Brugerens adgangskode er nulstillet",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+            resetPasswordCommand = new();
         }
     }
 
