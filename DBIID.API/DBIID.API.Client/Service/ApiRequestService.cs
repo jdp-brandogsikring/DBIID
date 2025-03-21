@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DBIID.Application.Shared.Attributes;
 using DBIID.Shared.Results;
@@ -88,12 +89,28 @@ public class ApiRequestService : IApiRequestService
     /// </summary>
     private string BuildUrl(string route, object request)
     {
-        foreach (var prop in request.GetType().GetProperties())
+        var props = request.GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+
+        var matches = Regex.Matches(route, "{(.*?)}");
+
+        foreach (Match match in matches)
         {
-            string key = $"{{{prop.Name}}}";
-            string value = prop.GetValue(request)?.ToString() ?? string.Empty;
-            route = route.Replace(key, Uri.EscapeDataString(value));
+            var key = match.Groups[1].Value; // fx "id"
+
+            if (props.TryGetValue(key, out var prop))
+            {
+                var value = prop.GetValue(request)?.ToString() ?? string.Empty;
+                route = route.Replace(match.Value, Uri.EscapeDataString(value));
+            }
+            else
+            {
+                // Leave {key} unchanged if no matching property
+                Console.WriteLine($"⚠️ Property '{key}' not found on request object.");
+            }
         }
+
         return route;
     }
 

@@ -1,0 +1,70 @@
+﻿@using DBI.DIGI.Components.Toast
+@using DBIID.Application.Shared.Dtos
+@using DBIID.Shared.Features.Users
+@inject IApiRequestService ApiRequestService
+@inject IToastService ToastService
+
+<h3>Rediger bruger</h3>
+
+<input @bind="user.GivenName" placeholder="Fornavn" />
+<input @bind="user.FamilyName" placeholder="Efternavn" />
+<input @bind="user.Email" placeholder="Email" />
+
+<button @onclick="OnUpdateUser">Create</button>
+
+@if (!string.IsNullOrEmpty(validationMessage))
+{
+    <p style="color:red">@validationMessage</p>
+}
+
+@code {
+
+    [Parameter]
+    public required int UserId { get; set; }
+
+    [Parameter]
+    public required EventCallback<UserDto> OnClose { get; set; }
+
+    private UpdateUserCommand user = new();
+    private string validationMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await ApiRequestService.SendAsync(new GetUserQuery() { Id = UserId });
+            if (response.IsSuccess)
+            {
+                user = new UpdateUserCommand()
+                    {
+                        Id = response.Value.Id,
+                        GivenName = response.Value.GivenName,
+                        FamilyName = response.Value.FamilyName,
+                        Email = response.Value.Email
+                    };
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OnUpdateUser()
+    {
+        validationMessage = string.Empty;
+
+        var response = await ApiRequestService.SendAsync(user);
+        if (!response.IsSuccess)
+        {
+            validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Brugeren er opdateret",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+            await OnClose.InvokeAsync(response.Value);
+        }
+    }
+}

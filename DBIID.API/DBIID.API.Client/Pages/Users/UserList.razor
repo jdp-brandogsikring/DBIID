@@ -1,0 +1,130 @@
+﻿@attribute [Route(RoutePaths.User.List)]
+@using DBI.DIGI.Components.Atoms.TextAtoms
+@using DBI.DIGI.Components.Layouts
+@using DBI.DIGI.Components.Table
+@using DBI.DIGI.Components.Toast
+@using DBIID.Application.Shared.Dtos
+@using DBIID.Shared.Features.Users
+@inject IApiRequestService ApiRequestService
+@inject IToastService toastService
+
+<HeadingContainer>
+    <Heading>
+        <PageHeader Color="black" >
+            Brugere
+        </PageHeader> 
+    </Heading>
+</HeadingContainer>
+
+@if (users is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <Table Data="users" Context="user" OnTableRowClick="((UserDto p) => onRowClicked(p))" Hover="true">
+        <Filters>
+            <TableFilter PropertyName="GivenName" Title="Fornavn"></TableFilter>
+            <TableFilter PropertyName="FamilyName" Title="Efternavn"></TableFilter>
+            <TableFilter PropertyName="Email" Title="E-mail"></TableFilter>
+        </Filters>
+        <HeaderContent>
+            <TableHead><TableHeadSort PropertyName="GivenName">Fornavn</TableHeadSort></TableHead>
+            <TableHead><TableHeadSort PropertyName="FamilyName">Efternavn</TableHeadSort></TableHead>
+            <TableHead><TableHeadSort PropertyName="Email">E-mail</TableHeadSort></TableHead>
+            <TableHeadMenu></TableHeadMenu>
+        </HeaderContent>
+        <RowTemplate>
+            <TableData>@user.GivenName</TableData>
+            <TableData>@user.FamilyName</TableData>
+            <TableData>@user.Email</TableData>
+            <TableDataMenu>
+                <TableDataMenuItem OnClick="() => editPerson(user)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
+                <TableDataMenuDevider></TableDataMenuDevider>
+                <TableDataMenuItem OnClick="() => deletePerson(user)"><i class="fa-light fa-trash"></i>Slet</TableDataMenuItem>
+            </TableDataMenu>
+        </RowTemplate>
+    </Table>
+
+
+    <DBI.DIGI.Components.Modals.Flyout IsVisible=@isFlyoutVisible OnClose="onFlyoutClose">
+        <FlyoutContent>
+            <EditUser UserId="@selectedUser.Id" OnClose="onEditClose"></EditUser>
+        </FlyoutContent>
+    </DBI.DIGI.Components.Modals.Flyout>
+}
+
+@code {
+    private List<UserDto> users;
+    private UserDto selectedUser;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await OnLoadDate();
+        }
+    }
+
+    private async Task OnLoadDate()
+    {
+            try
+            {
+
+                var response = await ApiRequestService.SendAsync(new GetAllUserQuery());
+                if (response.IsSuccess)
+                    users = response.Value.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            StateHasChanged();
+        
+    }
+
+    private bool isFlyoutVisible = false;
+
+    private async void onEditClose(UserDto user)
+    {
+        int index = users.IndexOf(selectedUser);
+        users[index] = user;
+
+        this.onFlyoutClose();
+    }
+
+    private async void onFlyoutClose()
+    {
+        isFlyoutVisible = false;
+
+        StateHasChanged();
+    }
+
+    void onRowClicked(UserDto user)
+    {
+        selectedUser = user;
+        isFlyoutVisible = true;
+        StateHasChanged();
+    }
+
+    public void editPerson(UserDto person)
+    {
+        display(person, "Rediger");
+    }
+
+    public void deletePerson(UserDto person)
+    {
+        display(person, "Delete");
+    }
+
+    private void display(UserDto person, string eventType)
+    {
+        toastService.Open(new ToastWithAutoClose()
+            {
+                Duration = TimeSpan.FromSeconds(5),
+                Title = eventType + " clicked on " + person.GivenName,
+                Status = ToastStatus.Info
+            });
+
+    }
+}
