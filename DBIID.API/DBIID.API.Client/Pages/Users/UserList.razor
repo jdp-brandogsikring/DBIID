@@ -11,7 +11,10 @@
 <HeadingContainer>
     <Heading>
         <PageHeader Color="black" >
-            Brugere
+            Brugere 
+            <button style="all:unset" @onclick="onNewUser">
+                <i class="fa-light fa-circle-plus"></i>
+            </button>
         </PageHeader> 
     </Heading>
 </HeadingContainer>
@@ -39,17 +42,21 @@ else
             <TableData>@user.FamilyName</TableData>
             <TableData>@user.Email</TableData>
             <TableDataMenu>
-                <TableDataMenuItem OnClick="() => editPerson(user)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
-                <TableDataMenuDevider></TableDataMenuDevider>
-                <TableDataMenuItem OnClick="() => deletePerson(user)"><i class="fa-light fa-trash"></i>Slet</TableDataMenuItem>
+                <TableDataMenuItem OnClick="() => onEditUser(user)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
             </TableDataMenu>
         </RowTemplate>
     </Table>
 
 
-    <DBI.DIGI.Components.Modals.Flyout IsVisible=@isFlyoutVisible OnClose="onFlyoutClose">
+    <DBI.DIGI.Components.Modals.Flyout IsVisible=@isEditVisible OnClose="onFlyoutClose">
         <FlyoutContent>
             <EditUser UserId="@selectedUser.Id" OnClose="onEditClose"></EditUser>
+        </FlyoutContent>
+    </DBI.DIGI.Components.Modals.Flyout>
+
+    <DBI.DIGI.Components.Modals.Flyout IsVisible=@isCreateVisible OnClose="onFlyoutClose">
+        <FlyoutContent>
+            <CreateUser OnClose="onCreateClose"></CreateUser>
         </FlyoutContent>
     </DBI.DIGI.Components.Modals.Flyout>
 }
@@ -57,6 +64,10 @@ else
 @code {
     private List<UserDto> users;
     private UserDto selectedUser;
+
+    private bool isEditVisible = false;
+    private bool isCreateVisible = false;
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -83,7 +94,12 @@ else
         
     }
 
-    private bool isFlyoutVisible = false;
+    private async void onCreateClose(UserDto user)
+    {
+        users.Add(user);
+
+        this.onFlyoutClose();
+    }
 
     private async void onEditClose(UserDto user)
     {
@@ -95,7 +111,8 @@ else
 
     private async void onFlyoutClose()
     {
-        isFlyoutVisible = false;
+        isEditVisible = false;
+        isCreateVisible = false;
 
         StateHasChanged();
     }
@@ -103,28 +120,20 @@ else
     void onRowClicked(UserDto user)
     {
         selectedUser = user;
-        isFlyoutVisible = true;
+        isEditVisible = true;
         StateHasChanged();
     }
 
-    public void editPerson(UserDto person)
+    public void onEditUser(UserDto user)
     {
-        display(person, "Rediger");
+        selectedUser = user;
+        isEditVisible = true;
+        StateHasChanged();
     }
 
-    public void deletePerson(UserDto person)
+    public void onNewUser()
     {
-        display(person, "Delete");
-    }
-
-    private void display(UserDto person, string eventType)
-    {
-        toastService.Open(new ToastWithAutoClose()
-            {
-                Duration = TimeSpan.FromSeconds(5),
-                Title = eventType + " clicked on " + person.GivenName,
-                Status = ToastStatus.Info
-            });
-
+        isCreateVisible = true;
+        StateHasChanged();
     }
 }

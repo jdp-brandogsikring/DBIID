@@ -1,9 +1,10 @@
-﻿@attribute [Route(RoutePaths.User.Create)]
+﻿@using DBI.DIGI.Components.Toast
 @using DBIID.Application.Shared.Dtos
 @using DBIID.Shared.Features.Users
 @inject IApiRequestService ApiRequestService
+@inject IToastService ToastService
 
-<h3>Create User</h3>
+<h3>Opret bruger</h3>
 
 <input @bind="user.GivenName" placeholder="Fornavn" />
 <input @bind="user.FamilyName" placeholder="Efternavn" />
@@ -17,6 +18,9 @@
 }
 
 @code {
+    [Parameter]
+    public required EventCallback<UserDto> OnClose { get; set; }
+
     private CreateUserCommand user = new();
     private string validationMessage;
 
@@ -29,10 +33,22 @@
         if (!response.IsSuccess)
         {
             validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
         }
         else
         {
-            Console.WriteLine("User created successfully!");
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Success,
+                    Title = "Brugeren er oprettet"
+                });
+            this.OnClose.InvokeAsync(response.Value);
         }
     }
 }
