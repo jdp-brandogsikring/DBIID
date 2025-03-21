@@ -1,14 +1,13 @@
-﻿@attribute [Route(RoutePaths.Login.Base)]
-@layout LoginLayout
+﻿
 @using DBI.DIGI.Components.Atoms.InputAtoms
 @using DBI.DIGI.Components.Toast
 @using DBIID.API.Client.Extensions
 @using DBIID.API.Client.Layout
+@using DBIID.Shared.Dtos
 @using Microsoft.AspNetCore.Components.WebAssembly;
 @inject HttpClient Http
 @inject JwtAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager navigationManager
-@inject IToastService toastService
 
 
 <label>E-mail</label>
@@ -24,47 +23,16 @@
     private string email = "jdp@brandogsikring.dk";
     private string password = "test";
 
-    string returnUrl;
-
-    protected override void OnInitialized()
-    {
-        returnUrl = navigationManager.GetQueryParameter("returnUrl") ?? "/";
-
-    }
+    [Parameter] public EventCallback<LoginResult> OnLoginResult { get; set; }
 
     private async Task OnLogin()
     {
         var response = await Http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
         if (response.IsSuccessStatusCode)
         {
-            var json = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-            string token = json["token"];
-            await AuthStateProvider.SetToken(token);
-            toastService.Open(new ToastWithAutoClose()
-                {
-                    Duration = TimeSpan.FromSeconds(5),
-                    Status = ToastStatus.Success,
-                    Title = "Du er nu logget ind"
-                });
+            var json = await response.Content.ReadFromJsonAsync<LoginResult>();
+            await OnLoginResult.InvokeAsync(json);
+        }
 
-            if (string.IsNullOrWhiteSpace(returnUrl))
-            {
-                navigationManager.NavigateTo(RoutePaths.Home);
-            }
-            else
-            {
-                // Efter login
-                navigationManager.NavigateTo(returnUrl);
-            }
-        }
-        else
-        {
-            toastService.Open(new ToastWithAutoClose()
-                {
-                    Duration = TimeSpan.FromSeconds(5),
-                    Status = ToastStatus.Error,
-                    Title = "Du kunne ikke logges ind"
-                });
-        }
     }
 }

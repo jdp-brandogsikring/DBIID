@@ -1,0 +1,51 @@
+﻿@using DBIID.API.Client.Layout
+@using DBIID.Shared.Dtos
+
+@if (loginResult == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var type in loginResult.Types)
+    {
+        if (type.Type == OtpTransactionType.EmailVerification)
+        {
+            <div class="mfa-type">
+                <i class="fa-light fa-envelope"></i>
+                <div class="mfa-type-title">
+                    <div>
+                        Send kode på e-mail
+                    </div>
+                    <div>
+                        @type.Title
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (type.Type == OtpTransactionType.SmsVerification)
+        {
+            <div class="mfa-type">
+                <i class="fa-light fa-comment-sms"></i>
+                <div class="mfa-type-title">
+                    <div>
+                        Send kode på SMS
+                    </div>
+                    <div>
+                        @type.Title
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}
+
+
+
+@code {
+    [Parameter]
+    public LoginResult loginResult { get; set; }
+
+
+}

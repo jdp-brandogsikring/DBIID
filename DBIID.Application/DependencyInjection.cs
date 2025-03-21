@@ -27,6 +27,8 @@ namespace DBIID.Application
         {
             services.AddAutoMapper(typeof(AutoMapperProfil));
             services.AddScoped<IPasswordService, PasswordService>();
+            services.AddScoped<IOtpService, OtpService>();
+
 
             return services;
         }

@@ -9,6 +9,7 @@ namespace DBIID.Shared.Dtos
     public class LoginResult
     {
         public int UserId { get; set; }
-        public string Email { get; set; }
+        public Guid OtpTransactionId { get; set; }
+        public List<OptTransactionTypeDto> Types { get; set; } = new List<OptTransactionTypeDto>();
     }
 }

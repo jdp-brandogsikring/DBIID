@@ -31,13 +31,12 @@ public class AuthController : ControllerBase
             return Unauthorized(result.Message);
         }
 
-        string token = _jwtService.GenerateToken(result.Value.UserId.ToString(), result.Value.Email, "Admin");
-
-        return Ok(new { Token = token });
+        return Ok(result.Value);
 
     }
 }
 
+        //string token = _jwtService.GenerateToken(result.Value.UserId.ToString(), result.Value.Email, "Admin");
 public class LoginModel
 {
     public string Email { get; set; }

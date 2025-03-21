@@ -6,7 +6,6 @@
     public static class Login
     {
         public const string Base = "/login";
-        public const string MFA = $"{Base}/MFA";
     }
 
     public static class User
