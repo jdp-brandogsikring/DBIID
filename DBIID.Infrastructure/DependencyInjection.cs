@@ -1,4 +1,6 @@
-﻿using DBIID.Application.Features.Users;
+﻿using DBIID.Application.Common.Data;
+using DBIID.Application.Features.Users;
+using DBIID.Infrastructure.Data.Commmen;
 using DBIID.Infrastructure.Data.Context;
 using DBIID.Infrastructure.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,7 @@ namespace DBIID.Application
 
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             return services;

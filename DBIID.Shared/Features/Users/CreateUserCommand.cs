@@ -17,6 +17,7 @@ namespace DBIID.Shared.Features.Users
     {
         public string GivenName { get; set; } = string.Empty;
         public string FamilyName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
 
@@ -26,6 +27,7 @@ namespace DBIID.Shared.Features.Users
         {
             RuleFor(x => x.GivenName).NotEmpty();
             RuleFor(x => x.FamilyName).NotEmpty();
+            RuleFor(x => x.Email).NotEmpty().EmailAddress();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DBIID.Application.Features.Auth;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace DBIID.Application
         public static IServiceCollection AddAutoMapper(this IServiceCollection services)
         {
             services.AddAutoMapper(typeof(AutoMapperProfil));
+            services.AddScoped<IPasswordService, PasswordService>();
 
             return services;
         }
