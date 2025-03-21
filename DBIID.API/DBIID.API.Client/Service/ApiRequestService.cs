@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -53,7 +54,9 @@ public class ApiRequestService : IApiRequestService
 
         if (httpMethod == HttpMethod.Post || httpMethod == HttpMethod.Put)
         {
-            httpRequest.Content = JsonContent.Create(request);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(request);
+            Console.WriteLine("📦 Request JSON: " + json); // Debug
+            httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
         }
 
         HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);

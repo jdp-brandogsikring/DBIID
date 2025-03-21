@@ -134,6 +134,13 @@ app.Use(async (context, next) =>
 {
     try
     {
+        context.Request.EnableBuffering();
+        using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+
+        Console.WriteLine("RAW BODY: " + body);
+
         await next();
     }
     catch (Exception ex)
