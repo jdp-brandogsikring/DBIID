@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DBIID.Shared.Features.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace DBIID.Application
     {
         public AutoMapperProfil()
         {
-            CreateMap<Domain.Entities.User, Shared.Dtos.UserDto>();
+            CreateMap<Domain.Entities.User, UserDto>();
         }
     }
 }

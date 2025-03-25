@@ -17,12 +17,12 @@ namespace DBIID.Application.Features.Auth
 
         public string GenerateOtp()
         {
-            string otp = new Random().Next(100000, 999999).ToString();
+            string otp = new Random().Next(1000, 9999).ToString();
 
             var otpInDB = otpTransactionRepository.GetAll().Where(x => x.OtpCode == otp && x.IsUsed == false).FirstOrDefault();
             while (otpInDB != null)
             {
-                otp = new Random().Next(100000, 999999).ToString();
+                otp = new Random().Next(1000, 9999).ToString();
                 otpInDB = otpTransactionRepository.GetAll().Where(x => x.OtpCode == otp && x.IsUsed == false).FirstOrDefault();
             }
 

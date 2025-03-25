@@ -1,38 +1,137 @@
-﻿
+﻿@attribute [Route(RoutePaths.Login.Base)]
+@layout LoginLayout
 @using DBI.DIGI.Components.Atoms.InputAtoms
 @using DBI.DIGI.Components.Toast
 @using DBIID.API.Client.Extensions
 @using DBIID.API.Client.Layout
-@using DBIID.Shared.Dtos
+@using DBIID.Shared.Features.Login
 @using Microsoft.AspNetCore.Components.WebAssembly;
 @inject HttpClient Http
 @inject JwtAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager navigationManager
+@inject IToastService toastService
 
-
-<label>E-mail</label>
-<TextInput @bind-Input="email" />
-
-<label>Adgangskode</label>
-<TextInput @bind-Input="password" />
-
-<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" Size="DBI.DIGI.Components.ButtonSize.FullWidth" OnClick="OnLogin" Title="Log ind"></DBI.DIGI.Components.Button>
+@switch (Step)
+{
+    case LoginStep.Login:
+        <h2 style="text-align:center">Login</h2>
+        <UsernameAndPassword OnLogin="OnLogin"></UsernameAndPassword>
+        @* <Login OnLoginResult="OnLoginResult"></Login> *@
+        break;
+    case LoginStep.MultiFactor:
+        <h2 style="text-align:center">Vælg 2 faktor</h2>
+        <MultiFactor loginResponse="loginResponse" OnSelectContactMedtod="OnSelectContactMedtod"></MultiFactor>
+        break;
+    case LoginStep.OTP:
+        <h2 style="text-align:center">Indtast OTP</h2>
+        <OtpInput OnCompleted="HandleOtpComplete" />
+        break;
+    default:
+        <p>Error</p>
+        break;
+}
 
 
 @code {
-    private string email = "jdp@brandogsikring.dk";
-    private string password = "test";
 
-    [Parameter] public EventCallback<LoginResult> OnLoginResult { get; set; }
+    LoginStep Step = LoginStep.Login;
+    string ReturnUrl;
+    LoginResponse? loginResponse;
 
-    private async Task OnLogin()
+    public enum LoginStep
     {
-        var response = await Http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
+        Login,
+        MultiFactor,
+        OTP
+    }
+
+    private async Task<string> OnLogin(string Email, string Password)
+    {
+        var response = await Http.PostAsJsonAsync("api/auth/login", new LoginRequest() { Email = Email, Password = Password });
         if (response.IsSuccessStatusCode)
         {
-            var json = await response.Content.ReadFromJsonAsync<LoginResult>();
-            await OnLoginResult.InvokeAsync(json);
+            loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            Step = LoginStep.MultiFactor;
+            StateHasChanged();
+            return "";
+        }
+        else
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private async void OnSelectContactMedtod(ContactMethodDto method)
+    {
+        if (loginResponse is null)
+        {
+            Step = LoginStep.Login;
+            StateHasChanged();
+            return;
         }
 
+        var request = new SendOtpRequest()
+            {
+                ContactMethodId = method.Id,
+                OtpTransactionId = loginResponse.OtpTransactionId,
+                UserId = loginResponse.UserId
+            };
+
+        var response = await Http.PostAsJsonAsync("api/auth/otpRequest", request);
+        if (response.IsSuccessStatusCode)
+        {
+            Step = LoginStep.OTP;
+        }
+        else
+        {
+            Step = LoginStep.Login;
+        }
+        StateHasChanged();
+    }
+
+    private async Task<bool> HandleOtpComplete(string otp)
+    {
+        if (loginResponse is null)
+        {
+            Step = LoginStep.Login;
+            StateHasChanged();
+            return false;
+        }
+
+        var request = new VerifyOtpRequest()
+            {
+                OtpCode = otp,
+                OtpTransactionId = loginResponse.OtpTransactionId,
+                UserId = loginResponse.UserId
+            };
+
+        var response = await Http.PostAsJsonAsync("api/auth/verifyotpRequest", request);
+        if (response.IsSuccessStatusCode)
+        {
+            var OtpResponse = await response.Content.ReadFromJsonAsync<VerifyOtpResponse>();
+            // Step = LoginStep.OTP;
+            await PostLogin(OtpResponse);
+        }
+        else
+        {
+            // Step = LoginStep.Login;
+        }
+        StateHasChanged();
+
+        return true;
+    }
+
+    private async Task PostLogin(VerifyOtpResponse otpResponse)
+    {
+        await AuthStateProvider.SetToken(otpResponse.Token);
+
+        if (string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            navigationManager.NavigateTo(RoutePaths.Home);
+        }
+        else
+        {
+            navigationManager.NavigateTo(ReturnUrl);
+        }
     }
 }

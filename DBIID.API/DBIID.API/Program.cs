@@ -13,6 +13,8 @@ using DBIID.Application.Features.Users;
 using FluentValidation;
 using DBI.DIGI.Components;
 using Blazored.LocalStorage;
+using DBIID.Application.Features.Auth;
+using DBIID.API.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,6 +129,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<JwtService>();
+
+builder.Services.AddScoped<ISendOTPService, SendOTPService>();
 
 // DIGI Design
 builder.Services.RegisterDependencies();

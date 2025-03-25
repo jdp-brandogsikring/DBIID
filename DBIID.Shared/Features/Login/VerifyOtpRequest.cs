@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DBIID.Shared.Dtos
+namespace DBIID.Shared.Features.Login
 {
-    public class LoginResult
+    public class VerifyOtpRequest
     {
         public int UserId { get; set; }
         public Guid OtpTransactionId { get; set; }
-        public List<OptTransactionTypeDto> Types { get; set; } = new List<OptTransactionTypeDto>();
+        public string OtpCode { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,7 @@
 ﻿using DBIID.Application.Features.Auth.Login;
+using DBIID.Application.Features.Auth.SendOptRequest;
+using DBIID.Application.Features.Auth.VerifyOtpRequest;
+using DBIID.Shared.Features.Login;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -17,7 +20,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
 
         var result = await mediator.Send(new LoginCommand()
@@ -32,13 +35,51 @@ public class AuthController : ControllerBase
         }
 
         return Ok(result.Value);
+    }
 
+    [HttpPost("otpRequest")]
+    public async Task<IActionResult> OtpRequest([FromBody] SendOtpRequest model)
+    {
+        var result = await mediator.Send(new OtpRequestCommand()
+        {
+            ContactMethodId = model.ContactMethodId,
+            OtpTransactionId = model.OtpTransactionId,
+            UserId = model.UserId
+        });
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Message);
+        }
+        return Ok(result.Message);
+    }
+
+    [HttpPost("verifyotpRequest")]
+    public async Task<IActionResult> VerifyotpRequest([FromBody] VerifyOtpRequest model)
+    {
+        var result = await mediator.Send(new VerifyOtpRequestCommand()
+        {
+            OtpCode = model.OtpCode,
+            OtpTransactionId = model.OtpTransactionId,
+            UserId = model.UserId
+        });
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Message);
+        }
+
+        DateTime expire = DateTime.Now.AddMinutes(30);
+        string token = _jwtService.GenerateToken(result.Value.Id.ToString(), result.Value.Email, "Admin", expire);
+
+        return Ok(new VerifyOtpResponse
+        {
+            Token = token,
+            Expires = expire,
+            Message = "Login successful"
+        });
+
+        
     }
 }
 
-        //string token = _jwtService.GenerateToken(result.Value.UserId.ToString(), result.Value.Email, "Admin");
-public class LoginModel
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
-}

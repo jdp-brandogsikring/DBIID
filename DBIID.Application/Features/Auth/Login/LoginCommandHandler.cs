@@ -2,7 +2,7 @@
 using DBIID.Application.Common.Handlers;
 using DBIID.Application.Features.Users;
 using DBIID.Domain.Entities;
-using DBIID.Shared.Dtos;
+using DBIID.Shared.Features.Login;
 using DBIID.Shared.Results;
 using MediatR;
 using System;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DBIID.Application.Features.Auth.Login
 {
-    public class LoginCommandHandler : ICommandHandler<LoginCommand, Result<LoginResult>>
+    public class LoginCommandHandler : ICommandHandler<LoginCommand, Result<LoginResponse>>
     {
         private readonly IUserRepository userRepository;
         private readonly IOtpTransactionRepository otpTransactionRepository;
@@ -34,24 +34,24 @@ namespace DBIID.Application.Features.Auth.Login
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<Result<LoginResult>> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var users = userRepository.GetAll().Where(x => x.Email.ToLower() == request.Email.ToLower());
             if(users.Count() == 0)
             {
-                return Result<LoginResult>.Error("User not found");
+                return Result<LoginResponse>.Error("User not found");
             }
 
             if(users.Count() != 1)
             {
-                return Result<LoginResult>.Error("Multiple users found");
+                return Result<LoginResponse>.Error("Multiple users found");
             }
 
             var user = users.First();
 
             if (!passwordService.ValidatePassword(request.Password, user.Password))
             {
-                return Result<LoginResult>.Error("Invalid password");
+                return Result<LoginResponse>.Error("Invalid password");
             }
 
             OtpTransaction otpTransaction = new OtpTransaction
@@ -67,7 +67,7 @@ namespace DBIID.Application.Features.Auth.Login
             await otpTransactionRepository.AddAsync(otpTransaction);
             await unitOfWork.SaveChangesAsync();
 
-            var loginresult = new LoginResult
+            var loginresult = new LoginResponse
             {
                 UserId = user.Id,
                 OtpTransactionId = otpTransaction.TransactionId,
@@ -77,21 +77,25 @@ namespace DBIID.Application.Features.Auth.Login
             var email = user.Email;
             var maskedEmail = string.Format("{0}****{1}", email[0], email.Substring(email.IndexOf('@') - 1));
 
-            loginresult.Types.Add(new OptTransactionTypeDto()
+            loginresult.Types.Add(new ContactMethodDto()
             {
-                Type = OtpTransactionType.EmailVerification,
-                Title = maskedEmail,
+                Id = "EMAIL",
+                Value = maskedEmail,
+                Type = "EMAIL",
+                Description = "Arbejde",
             });
 
             var maskedPhone = "20650166".Substring(0, 2) + "****" + "20650166".Substring(6, 2);
-            loginresult.Types.Add(new OptTransactionTypeDto()
+            loginresult.Types.Add(new ContactMethodDto()
             {
-                Type = OtpTransactionType.SmsVerification,
-                Title = maskedPhone,
+                Id = "PHONE",
+                Value = maskedPhone,
+                Type = "PHONE",
+                Description = "Privat",
             });
 
 
-            return Result<LoginResult>.Success(loginresult);
+            return Result<LoginResponse>.Success(loginresult);
         }
     }
 }

@@ -12,7 +12,7 @@ public class JwtService
         _config = config;
     }
 
-    public string GenerateToken(string userId, string email, string role)
+    public string GenerateToken(string userId, string email, string role, DateTime expire)
     {
         var keyString = _config["Jwt:Key"];
         if (string.IsNullOrEmpty(keyString) || keyString.Length < 32)
@@ -34,7 +34,7 @@ public class JwtService
             _config["Jwt:Issuer"],
             _config["Jwt:Issuer"],
             claims,
-            expires: DateTime.UtcNow.AddHours(2),
+            expires: expire,
             signingCredentials: creds
         );
 

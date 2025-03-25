@@ -1,0 +1,129 @@
+﻿<div style="display: flex; gap: 0.5rem;">
+    <input @ref="input0"
+    type="text"
+    maxlength="1"
+    pattern="\d*"
+    class="otp-box"
+    @oninput="(e) => OnInput(e, 0)"
+    @onkeydown="(e) => OnKeyDown(e, 0)"
+    value="@Otp0" />
+
+    <input @ref="input1"
+    type="text"
+    maxlength="1"
+    pattern="\d*"
+    class="otp-box"
+    @oninput="(e) => OnInput(e, 1)"
+    @onkeydown="(e) => OnKeyDown(e, 1)"
+    value="@Otp1" />
+
+    <input @ref="input2"
+    type="text"
+    maxlength="1"
+    pattern="\d*"
+    class="otp-box"
+    @oninput="(e) => OnInput(e, 2)"
+    @onkeydown="(e) => OnKeyDown(e, 2)"
+    value="@Otp2" />
+
+    <input @ref="input3"
+    type="text"
+    maxlength="1"
+    pattern="\d*"
+    class="otp-box"
+    @oninput="(e) => OnInput(e, 3)"
+    @onkeydown="(e) => OnKeyDown(e, 3)"
+    value="@Otp3" />
+</div>
+
+@code {
+    private string Otp0 = "";
+    private string Otp1 = "";
+    private string Otp2 = "";
+    private string Otp3 = "";
+
+    private ElementReference input0;
+    private ElementReference input1;
+    private ElementReference input2;
+    private ElementReference input3;
+
+    [Parameter]
+    public required Func<string, Task<bool>> OnCompleted { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await input0.FocusAsync();
+        }
+    }
+
+    private async Task onCompleted(string code)
+    {
+        bool isValid = await OnCompleted.Invoke(code);
+        if (!isValid)
+        {
+            Otp0 = "";
+            Otp1 = "";
+            Otp2 = "";
+            Otp3 = "";
+            await input0.FocusAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async void OnInput(ChangeEventArgs e, int index)
+    {
+        var value = e.Value?.ToString();
+        if (string.IsNullOrEmpty(value) || !char.IsDigit(value[0]))
+            return;
+
+        var digit = value[0].ToString();
+        switch (index)
+        {
+            case 0:
+                Otp0 = digit;
+                await input1.FocusAsync();
+                break;
+            case 1:
+                Otp1 = digit;
+                await input2.FocusAsync();
+                break;
+            case 2:
+                Otp2 = digit;
+                await input3.FocusAsync();
+                break;
+            case 3:
+                Otp3 = digit;
+                var code = Otp0 + Otp1 + Otp2 + Otp3;
+                await onCompleted(code);
+                break;
+        }
+
+        StateHasChanged(); // Så UI opdateres med ny værdi
+    }
+
+    private async void OnKeyDown(KeyboardEventArgs e, int index)
+    {
+        if (e.Key == "Backspace")
+        {
+            switch (index)
+            {
+                case 1:
+                    Otp1 = "";
+                    await input0.FocusAsync();
+                    break;
+                case 2:
+                    Otp2 = "";
+                    await input1.FocusAsync();
+                    break;
+                case 3:
+                    Otp3 = "";
+                    await input2.FocusAsync();
+                    break;
+            }
+
+            StateHasChanged();
+        }
+    }
+}

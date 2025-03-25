@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DBIID.Domain.Enums
+namespace DBIID.Shared.Features.Login
 {
-    public enum OtpTransactionType
+    public enum ContactType
     {
         NotSet = 0,
-        EmailVerification = 1,
-        PhoneVerification = 2,
+        Email = 1,
+        Phone = 2,
     }
 }
