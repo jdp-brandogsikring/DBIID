@@ -30,7 +30,7 @@ else
 
         @if (type.Type == "PHONE")
         {
-            <div class="mfa-type">
+            <div class="mfa-type" @onclick="() => onSelect(type)">
                 <i class="fa-light fa-comment-sms"></i>
                 <div class="mfa-type-title">
                     <div>

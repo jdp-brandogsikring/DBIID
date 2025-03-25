@@ -5,11 +5,11 @@
 
 <h3>Opret bruger</h3>
 
-<input @bind="user.GivenName" placeholder="Fornavn" />
-<input @bind="user.FamilyName" placeholder="Efternavn" />
-<input @bind="user.Email" placeholder="Email" />
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Fornavn" @bind-Input="user.GivenName"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Efternavn" @bind-Input="user.FamilyName"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="E-mail" @bind-Input="user.Email"></DBI.DIGI.Components.Inputs.LabeledTextInput>
 
-<button @onclick="OnCreateUser">Create</button>
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnCreateUser" Title="Opret bruger"></DBI.DIGI.Components.Button>
 
 @if (!string.IsNullOrEmpty(validationMessage))
 {

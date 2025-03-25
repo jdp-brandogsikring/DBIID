@@ -5,9 +5,9 @@
 
 <h3>Rediger bruger</h3>
 
-<input @bind="user.GivenName" placeholder="Fornavn" />
-<input @bind="user.FamilyName" placeholder="Efternavn" />
-<input @bind="user.Email" placeholder="Email" />
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Fornavn" @bind-Input="user.GivenName"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Efternavn" @bind-Input="user.FamilyName"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="E-mail" @bind-Input="user.Email"></DBI.DIGI.Components.Inputs.LabeledTextInput>
 
 
 <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnUpdateUser" Title="Opdater bruger"></DBI.DIGI.Components.Button>
@@ -15,7 +15,7 @@
 <br />
 <br />
 
-<input @bind="resetPasswordCommand.Password" placeholder="Adgangskode" />
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Ny adgangskode" @bind-Input="resetPasswordCommand.Password"></DBI.DIGI.Components.Inputs.LabeledTextInput>
 <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Sec" OnClick="OnResetPassword" Title="Nulstil adgangskode"></DBI.DIGI.Components.Button>
 
 
