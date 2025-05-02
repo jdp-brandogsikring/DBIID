@@ -32,6 +32,13 @@ namespace DBIID.Application.Features.Users
             {
                 return Result.Error("User not found");
             }
+
+            var passwordMeetsRequirements = passwordService.ValidatePassword(request.Password, user.Password);
+            if(passwordMeetsRequirements)
+            {
+                return Result.Error("Adgangskoden opfylder ikke kravene: " + passwordMeetsRequirements);
+            }
+
             user.Password = passwordService.HashPassword(request.Password);
             await unitOfWork.SaveChangesAsync();
             return Result.Success("Adgangskoden er nulstillet");

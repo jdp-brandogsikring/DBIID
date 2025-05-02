@@ -11,5 +11,7 @@ namespace DBIID.Application.Features.Auth
         string HashPassword(string password);
         bool ValidatePassword(string password, string hashedPassword);
 
+        string PasswordMeetsRequirements(string password);
+
     }
 }
