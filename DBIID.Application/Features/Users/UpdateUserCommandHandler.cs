@@ -33,6 +33,13 @@ namespace DBIID.Application.Features.Users
             {
                 return Result<UserDto>.Error("User not found");
             }
+
+            var userWithEmail = userRepository.GetAll().FirstOrDefault(x => x.Email.ToLower() == request.Email.ToLower());
+            if (userWithEmail != null && userWithEmail.Id != user.Id)
+            {
+                return Result<UserDto>.Error("Email already exists");
+            }
+
             user.GivenName = request.GivenName;
             user.FamilyName = request.FamilyName;
             user.Email = request.Email;

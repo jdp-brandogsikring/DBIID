@@ -37,6 +37,12 @@ namespace DBIID.Application.Features.Users
                 Password = ""
             };
 
+            var userWithEmail = userRepository.GetAll().FirstOrDefault(x => x.Email.ToLower() == request.Email.ToLower());
+            if (userWithEmail != null)
+            {
+                return Result<UserDto>.Error("Email already exists");
+            }
+
             await userRepository.AddAsync(user);
             await unitOfWork.SaveChangesAsync();
             return Result<UserDto>.Success(mapper.Map<UserDto>(user));
