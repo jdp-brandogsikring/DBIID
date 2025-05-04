@@ -23,6 +23,7 @@ namespace DBIID.Infrastructure.Data.Context
 
         public DbSet<User> Users { get; set; }
         public DbSet<OtpTransaction> OtpTransactions { get; set; }
+        public DbSet<IdentityProvider> IdentityProviders { get; set; }
 
     }
 }

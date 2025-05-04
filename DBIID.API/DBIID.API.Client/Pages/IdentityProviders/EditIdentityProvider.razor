@@ -1,0 +1,76 @@
+﻿@using DBI.DIGI.Components.Toast
+@using DBIID.Shared.Features.IdentityProviders
+@using DBIID.Shared.Features.Users
+@inject IApiRequestService ApiRequestService
+@inject IToastService ToastService
+
+<h3>Rediger Identitetsudbyder</h3>
+
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Navn" @bind-Input="IdentityProvider.Name"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+
+
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnUpdateUser" Title="Opdater Identitetsudbyder"></DBI.DIGI.Components.Button>
+
+
+
+@if(string.IsNullOrEmpty(validationMessage))
+{
+    <p style="color:red">@validationMessage</p>
+}
+
+@code {
+
+    [Parameter]
+    public required int Id { get; set; }
+
+    [Parameter]
+    public required EventCallback<IdentityProviderDto> OnClose { get; set; }
+
+    private UpdateIdentityProviderCommand IdentityProvider = new();
+    private string validationMessage { get; set; }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await ApiRequestService.SendAsync(new GetIdentityProviderQuery() { Id = Id });
+            if (response.IsSuccess)
+            {
+                IdentityProvider = new UpdateIdentityProviderCommand()
+                    {
+                        Id = response.Value.Id,
+                        Name = response.Value.Name
+                    };
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OnUpdateUser()
+    {
+        validationMessage = string.Empty;
+
+        var response = await ApiRequestService.SendAsync(IdentityProvider);
+        if (!response.IsSuccess)
+        {
+            validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Identitetsudbyderen er opdateret",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+            await OnClose.InvokeAsync(response.Value);
+        }
+    }
+}

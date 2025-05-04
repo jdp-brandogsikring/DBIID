@@ -16,4 +16,13 @@
         public static string Details(string userId) => $"{Base}/{userId}";
         //public static string Permissions(string userId) => $"{Details(userId)}/permissions";
     }
+
+    public static class IdentityProviders
+    {
+        public const string Base = "/identityproviders";
+        public const string List = $"{Base}/list";
+        public const string Create = $"{Base}/create";
+        public static string Details(string identityProviderId) => $"{Base}/{identityProviderId}";
+    }
+    
 }

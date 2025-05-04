@@ -87,6 +87,12 @@
         if (!response.IsSuccess)
         {
             validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
         }
         else
         {
