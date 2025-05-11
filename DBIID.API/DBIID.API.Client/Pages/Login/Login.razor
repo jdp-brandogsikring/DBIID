@@ -6,6 +6,7 @@
 @using DBIID.API.Client.Layout
 @using DBIID.Shared.Features.Login
 @using Microsoft.AspNetCore.Components.WebAssembly;
+@using Microsoft.AspNetCore.WebUtilities
 @inject HttpClient Http
 @inject JwtAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager navigationManager
@@ -35,7 +36,7 @@
 @code {
 
     LoginStep Step = LoginStep.Login;
-    string ReturnUrl;
+    public string? ReturnUrl { get; set; }
     LoginResponse? loginResponse;
 
     public enum LoginStep
@@ -44,6 +45,16 @@
         MultiFactor,
         OTP
     }
+
+    protected override void OnInitialized()
+    {
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var returnUrl))
+        {
+            ReturnUrl = returnUrl;
+        }
+    }
+
 
     private async Task<string> OnLogin(string Email, string Password)
     {

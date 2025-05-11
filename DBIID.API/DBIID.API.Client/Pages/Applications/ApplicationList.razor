@@ -32,10 +32,14 @@ else
         </Filters>
         <HeaderContent>
             <TableHead><TableHeadSort PropertyName="Name">Navn</TableHeadSort></TableHead>
+            <TableHead><TableHeadSort PropertyName="Token">Token</TableHeadSort></TableHead>
+            <TableHead><TableHeadSort PropertyName="Url">Url</TableHeadSort></TableHead>
             <TableHeadMenu></TableHeadMenu>
         </HeaderContent>
         <RowTemplate>
             <TableData>@application.Name</TableData>
+            <TableData>@application.Token</TableData>
+            <TableData>@application.Url</TableData>
             <TableDataMenu>
                 <TableDataMenuItem OnClick="() => onEdit(application)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
             </TableDataMenu>

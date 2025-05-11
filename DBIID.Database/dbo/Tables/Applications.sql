@@ -1,6 +1,8 @@
 ﻿CREATE TABLE [dbo].[Applications] (
     [Id]         INT            IDENTITY (1, 1) NOT NULL,
     [Name]  NVARCHAR (255) NOT NULL,
+    [Token]  NVARCHAR (255) NULL,
+    [Url] NVARCHAR (255) NULL,
     CONSTRAINT [PK_Applications] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

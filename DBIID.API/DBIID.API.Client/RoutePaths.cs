@@ -6,6 +6,7 @@
     public static class Login
     {
         public const string Base = "/login";
+        public const string Application = $"{Base}/application";
     }
 
     public static class User

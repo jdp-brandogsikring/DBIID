@@ -29,12 +29,16 @@ namespace DBIID.Application.Features.Applications
                 return Result<ApplicationDto>.Error("Application not found");
             }
             application.Name = request.Name;
+            application.Url = request.Url;
             applicationRepository.Update(application);
             await unitOfWork.SaveChangesAsync();
             var applicationDto = new ApplicationDto
             {
                 Id = application.Id,
                 Name = application.Name,
+                Token = application.Token,
+                Url = application.Url,
+
             };
             return Result<ApplicationDto>.Success(applicationDto);
         }

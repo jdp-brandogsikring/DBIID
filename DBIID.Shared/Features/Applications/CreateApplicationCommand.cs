@@ -15,6 +15,7 @@ namespace DBIID.Shared.Features.Applications
     public class CreateApplicationCommand : IRequest<Result<ApplicationDto>>
     {
         public string Name { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
     }
 
     public class CreateApplicationCommandValidator : AbstractValidator<CreateApplicationCommand>
@@ -22,6 +23,7 @@ namespace DBIID.Shared.Features.Applications
         public CreateApplicationCommandValidator()
         {
             RuleFor(x => x.Name).NotEmpty();
+            RuleFor(x => x.Url).NotEmpty();
         }
     }
 }

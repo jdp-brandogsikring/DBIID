@@ -27,6 +27,8 @@ namespace DBIID.Application.Features.Applications
             var application = new Domain.Entities.Application
             {
                 Name = request.Name,
+                Url = request.Url,
+                Token = Guid.NewGuid().ToString().Replace("-", ""),
             };
             await applicationRepository.AddAsync(application);
             await unitOfWork.SaveChangesAsync();
@@ -34,6 +36,7 @@ namespace DBIID.Application.Features.Applications
             {
                 Id = application.Id,
                 Name = application.Name,
+                Token = application.Token,
             });
         }
     }

@@ -24,6 +24,8 @@ namespace DBIID.Application.Features.Applications
             {
                 Id = c.Id,
                 Name = c.Name,
+                Token = c.Token,
+                Url = c.Url,
             }).ToList();
             return Result<List<ApplicationDto>>.Success(applicationDtos);
         }
