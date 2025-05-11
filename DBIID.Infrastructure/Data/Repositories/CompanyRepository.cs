@@ -1,4 +1,4 @@
-﻿using DBIID.Application.Features.IdentityProviders;
+﻿using DBIID.Application.Features.Companies;
 using DBIID.Domain.Entities;
 using DBIID.Infrastructure.Data.Commmen;
 using DBIID.Infrastructure.Data.Context;
@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DBIID.Infrastructure.Data.Repositories
 {
-    public class IdentityProviderRepository : GenericRepository<IdentityProvider>, IIdentityProviderRepository
+    public class CompanyRepository : GenericRepository<Company>, ICompanyRepository
     {
-        public IdentityProviderRepository(MasterDbContext context) : base(context)
+        public CompanyRepository(MasterDbContext context) : base(context)
         {
         }
     }

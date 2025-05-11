@@ -1,13 +1,14 @@
 ﻿@using DBI.DIGI.Components.Toast
-@using DBIID.Shared.Features.IdentityProviders
+@using DBIID.Shared.Features.Applications
+@using DBIID.Shared.Features.Companies
 @inject IApiRequestService ApiRequestService
 @inject IToastService ToastService
 
-<h3>Opret Identitetsudbyder</h3>
+<h3>Opret applikation</h3>
 
 <DBI.DIGI.Components.Inputs.LabeledTextInput Label="Navn" @bind-Input="command.Name"></DBI.DIGI.Components.Inputs.LabeledTextInput>
 
-<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnCreate" Title="Opret identitetsudbyder"></DBI.DIGI.Components.Button>
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnCreate" Title="Opret applikation"></DBI.DIGI.Components.Button>
 
 @if (!string.IsNullOrEmpty(validationMessage))
 {
@@ -16,9 +17,9 @@
 
 @code {
     [Parameter]
-    public required EventCallback<IdentityProviderDto> OnClose { get; set; }
+    public required EventCallback<ApplicationDto> OnClose { get; set; }
 
-    private CreateIdentityProviderCommand command = new();
+    private CreateApplicationCommand command = new();
     private string validationMessage;
 
     private async Task OnCreate()
@@ -43,7 +44,7 @@
                 {
                     Duration = TimeSpan.FromSeconds(5),
                     Status = ToastStatus.Success,
-                    Title = "Identitetsudbyder er oprettet"
+                    Title = "Applikationen er oprettet"
                 });
             this.OnClose.InvokeAsync(response.Value);
         }

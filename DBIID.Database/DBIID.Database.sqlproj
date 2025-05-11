@@ -62,7 +62,8 @@
   <ItemGroup>
     <Build Include="dbo\Tables\Users.sql" />
     <Build Include="dbo\Tables\OtpTransactions.sql" />
-    <Build Include="dbo\Tables\IdentityProviders.sql" />
+    <Build Include="dbo\Tables\Companies.sql" />
+    <Build Include="dbo\Tables\Applications.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CompareWithLocal.scmp" />

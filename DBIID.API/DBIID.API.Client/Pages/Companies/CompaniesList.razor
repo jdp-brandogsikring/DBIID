@@ -1,0 +1,133 @@
+﻿@attribute [Route(RoutePaths.Companies.List)]
+@using DBI.DIGI.Components.Atoms.TextAtoms
+@using DBI.DIGI.Components.Layouts
+@using DBI.DIGI.Components.Table
+@using DBI.DIGI.Components.Toast
+@using DBIID.Shared.Features.Companies
+@using DBIID.Shared.Features.Users
+@inject IApiRequestService ApiRequestService
+@inject IToastService toastService
+
+<HeadingContainer>
+    <Heading>
+        <PageHeader Color="black" >
+            Virksomheder
+            <button style="all:unset" @onclick="onNewIdentityProvider">
+                <i class="fa-light fa-circle-plus"></i>
+            </button>
+        </PageHeader> 
+    </Heading>
+</HeadingContainer>
+
+@if (companies is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <Table Data="companies" Context="comapny" OnTableRowClick="((CompanyDto p) => onRowClicked(p))" Hover="true">
+        <Filters>
+            <TableFilter PropertyName="Name" Title="Navn"></TableFilter>
+        </Filters>
+        <HeaderContent>
+            <TableHead><TableHeadSort PropertyName="Name">Navn</TableHeadSort></TableHead>
+            <TableHeadMenu></TableHeadMenu>
+        </HeaderContent>
+        <RowTemplate>
+            <TableData>@comapny.Name</TableData>
+            <TableDataMenu>
+                <TableDataMenuItem OnClick="() => onEdit(comapny)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
+            </TableDataMenu>
+        </RowTemplate>
+    </Table>
+
+
+    <DBI.DIGI.Components.Modals.Flyout IsVisible=@isEditVisible OnClose="onFlyoutClose">
+        <FlyoutContent>
+            <EditCompany Id="@selected.Id" OnClose="onEditClose"></EditCompany>
+        </FlyoutContent>
+    </DBI.DIGI.Components.Modals.Flyout>
+
+    <DBI.DIGI.Components.Modals.Flyout IsVisible=@isCreateVisible OnClose="onFlyoutClose">
+        <FlyoutContent>
+            <CreateCompany OnClose="onCreateClose"></CreateCompany>
+        </FlyoutContent>
+    </DBI.DIGI.Components.Modals.Flyout> 
+}
+
+@code {
+    private List<CompanyDto> companies;
+    private CompanyDto selected;
+
+    private bool isEditVisible = false;
+    private bool isCreateVisible = false;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await OnLoadDate();
+        }
+    }
+
+    private async Task OnLoadDate()
+    {
+            try
+            {
+
+                var response = await ApiRequestService.SendAsync(new GetAllCompaniesQuery());
+                if (response.IsSuccess)
+                companies = response.Value.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            StateHasChanged();
+        
+    }
+
+    private async void onCreateClose(CompanyDto company)
+    {
+        companies.Add(company);
+
+        this.onFlyoutClose();
+    }
+
+    private async void onEditClose(CompanyDto company)
+    {
+        int index = companies.IndexOf(selected);
+        companies[index] = company;
+
+        this.onFlyoutClose();
+    }
+
+    private async void onFlyoutClose()
+    {
+        isEditVisible = false;
+        isCreateVisible = false;
+
+        StateHasChanged();
+    }
+
+    void onRowClicked(CompanyDto company)
+    {
+        selected = company;
+        isEditVisible = true;
+        StateHasChanged();
+    }
+
+    public void onEdit(CompanyDto company)
+    {
+        selected = company;
+        isEditVisible = true;
+        StateHasChanged();
+    }
+
+    public void onNewIdentityProvider()
+    {
+        isCreateVisible = true;
+        StateHasChanged();
+    }
+}

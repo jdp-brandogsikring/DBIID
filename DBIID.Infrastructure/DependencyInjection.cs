@@ -1,6 +1,7 @@
 ﻿using DBIID.Application.Common.Data;
+using DBIID.Application.Features.Applications;
 using DBIID.Application.Features.Auth;
-using DBIID.Application.Features.IdentityProviders;
+using DBIID.Application.Features.Companies;
 using DBIID.Application.Features.Users;
 using DBIID.Infrastructure.Data.Commmen;
 using DBIID.Infrastructure.Data.Context;
@@ -31,7 +32,8 @@ namespace DBIID.Application
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IOtpTransactionRepository, OtpTransactionRepository>();
-            services.AddScoped<IIdentityProviderRepository, IdentityProviderRepository>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
             return services;
         }

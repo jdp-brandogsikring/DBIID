@@ -1,9 +1,10 @@
-﻿@attribute [Route(RoutePaths.IdentityProviders.List)]
+﻿@attribute [Route(RoutePaths.Applications.List)]
 @using DBI.DIGI.Components.Atoms.TextAtoms
 @using DBI.DIGI.Components.Layouts
 @using DBI.DIGI.Components.Table
 @using DBI.DIGI.Components.Toast
-@using DBIID.Shared.Features.IdentityProviders
+@using DBIID.Shared.Features.Applications
+@using DBIID.Shared.Features.Companies
 @using DBIID.Shared.Features.Users
 @inject IApiRequestService ApiRequestService
 @inject IToastService toastService
@@ -11,7 +12,7 @@
 <HeadingContainer>
     <Heading>
         <PageHeader Color="black" >
-            Identitetsudbydere
+            Applikationer
             <button style="all:unset" @onclick="onNewIdentityProvider">
                 <i class="fa-light fa-circle-plus"></i>
             </button>
@@ -19,28 +20,24 @@
     </Heading>
 </HeadingContainer>
 
-@if (identityProviders is null)
+@if (applications is null)
 {
     <p>Loading...</p>
 }
 else
 {
-    <Table Data="identityProviders" Context="identityProvider" OnTableRowClick="((IdentityProviderDto p) => onRowClicked(p))" Hover="true">
+    <Table Data="applications" Context="application" OnTableRowClick="((ApplicationDto p) => onRowClicked(p))" Hover="true">
         <Filters>
             <TableFilter PropertyName="Name" Title="Navn"></TableFilter>
         </Filters>
         <HeaderContent>
             <TableHead><TableHeadSort PropertyName="Name">Navn</TableHeadSort></TableHead>
-            <TableHead><TableHeadSort PropertyName="TenantId">Tenant Id</TableHeadSort></TableHead>
-            <TableHead><TableHeadSort PropertyName="Secret">Nøgle</TableHeadSort></TableHead>
             <TableHeadMenu></TableHeadMenu>
         </HeaderContent>
         <RowTemplate>
-            <TableData>@identityProvider.Name</TableData>
-            <TableData>@identityProvider.TenantId</TableData>
-            <TableData>@identityProvider.Secret</TableData>
+            <TableData>@application.Name</TableData>
             <TableDataMenu>
-                <TableDataMenuItem OnClick="() => onEdit(identityProvider)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
+                <TableDataMenuItem OnClick="() => onEdit(application)"><i class="fa-light fa-folder-open"></i>Åben</TableDataMenuItem>
             </TableDataMenu>
         </RowTemplate>
     </Table>
@@ -48,20 +45,20 @@ else
 
     <DBI.DIGI.Components.Modals.Flyout IsVisible=@isEditVisible OnClose="onFlyoutClose">
         <FlyoutContent>
-            <EditIdentityProvider Id="@selected.Id" OnClose="onEditClose"></EditIdentityProvider>
+            <EditApplication Id="@selected.Id" OnClose="onEditClose"></EditApplication>
         </FlyoutContent>
     </DBI.DIGI.Components.Modals.Flyout>
 
     <DBI.DIGI.Components.Modals.Flyout IsVisible=@isCreateVisible OnClose="onFlyoutClose">
         <FlyoutContent>
-            <CreateIdentityProvider OnClose="onCreateClose"></CreateIdentityProvider>
+            <CreateApplication OnClose="onCreateClose"></CreateApplication>
         </FlyoutContent>
     </DBI.DIGI.Components.Modals.Flyout> 
 }
 
 @code {
-    private List<IdentityProviderDto> identityProviders;
-    private IdentityProviderDto selected;
+    private List<ApplicationDto> applications;
+    private ApplicationDto selected;
 
     private bool isEditVisible = false;
     private bool isCreateVisible = false;
@@ -80,9 +77,9 @@ else
             try
             {
 
-                var response = await ApiRequestService.SendAsync(new GetAllIdentityProvidersQuery());
+                var response = await ApiRequestService.SendAsync(new GetAllApplicationsQuery());
                 if (response.IsSuccess)
-                identityProviders = response.Value.ToList();
+                applications = response.Value.ToList();
             }
             catch (Exception ex)
             {
@@ -92,17 +89,17 @@ else
         
     }
 
-    private async void onCreateClose(IdentityProviderDto identityProvider)
+    private async void onCreateClose(ApplicationDto applications)
     {
-        identityProviders.Add(identityProvider);
+        this.applications.Add(applications);
 
         this.onFlyoutClose();
     }
 
-    private async void onEditClose(IdentityProviderDto identityProvider)
+    private async void onEditClose(ApplicationDto applications)
     {
-        int index = identityProviders.IndexOf(selected);
-        identityProviders[index] = identityProvider;
+        int index = this.applications.IndexOf(selected);
+        this.applications[index] = applications;
 
         this.onFlyoutClose();
     }
@@ -115,16 +112,16 @@ else
         StateHasChanged();
     }
 
-    void onRowClicked(IdentityProviderDto identityProvider)
+    void onRowClicked(ApplicationDto application)
     {
-        selected = identityProvider;
+        selected = application;
         isEditVisible = true;
         StateHasChanged();
     }
 
-    public void onEdit(IdentityProviderDto identityProvider)
+    public void onEdit(ApplicationDto application)
     {
-        selected = identityProvider;
+        selected = application;
         isEditVisible = true;
         StateHasChanged();
     }

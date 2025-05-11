@@ -1,0 +1,51 @@
+﻿@using DBI.DIGI.Components.Toast
+@using DBIID.Shared.Features.Companies
+@inject IApiRequestService ApiRequestService
+@inject IToastService ToastService
+
+<h3>Opret virksomhed</h3>
+
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Navn" @bind-Input="command.Name"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnCreate" Title="Opret virksomhed"></DBI.DIGI.Components.Button>
+
+@if (!string.IsNullOrEmpty(validationMessage))
+{
+    <p style="color:red">@validationMessage</p>
+}
+
+@code {
+    [Parameter]
+    public required EventCallback<CompanyDto> OnClose { get; set; }
+
+    private CreateCompanyCommand command = new();
+    private string validationMessage;
+
+    private async Task OnCreate()
+    {
+        validationMessage = string.Empty;
+
+        var response = await ApiRequestService.SendAsync(command);
+
+        if (!response.IsSuccess)
+        {
+            validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Success,
+                    Title = "virksomheden er oprettet"
+                });
+            this.OnClose.InvokeAsync(response.Value);
+        }
+    }
+}
