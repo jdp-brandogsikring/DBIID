@@ -26,11 +26,15 @@ namespace DBIID.Infrastructure.Data.Context
         public DbSet<Domain.Entities.Application> Applications { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<LinkUserCompany> LinkUserCompanies { get; set; }
+        public DbSet<LinkApplicationCompany> LinkApplicationCompanies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LinkUserCompany>()
                   .HasKey(m => new { m.UserId, m.CompanyId});
+
+            modelBuilder.Entity<LinkApplicationCompany>()
+                  .HasKey(m => new { m.ApplicationId, m.CompanyId });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿@using DBI.DIGI.Components.Toast
+@using DBIID.Shared.Features.Applications
 @using DBIID.Shared.Features.Companies
 @using DBIID.Shared.Features.Users
 @inject IApiRequestService ApiRequestService
@@ -6,16 +7,34 @@
 
 <h3>Rediger virksomhed</h3>
 
-<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Navn" @bind-Input="IdentityProvider.Name"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Navn" @bind-Input="company.Name"></DBI.DIGI.Components.Inputs.LabeledTextInput>
 
 
 <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnUpdateUser" Title="Opdater virksomhed"></DBI.DIGI.Components.Button>
 
-
-
 @if (string.IsNullOrEmpty(validationMessage))
 {
     <p style="color:red">@validationMessage</p>
+}
+
+
+<hr />
+<h5>Applikationer</h5>
+
+@if(Applications is not null)
+{
+    foreach (var app in Applications)
+    {
+        <p>@app.Name</p>
+        @if (companyWithApplications.Applications.Any(x => x.Id == app.Id))
+        {
+            <DBI.DIGI.Components.Button Title="Fjern" OnClick="() => Remove(app.Id)"></DBI.DIGI.Components.Button>
+        }
+        else
+        {
+            <DBI.DIGI.Components.Button Title="Tilføj" OnClick="() => Assign(app.Id)"></DBI.DIGI.Components.Button>
+        }
+    }
 }
 
 @code {
@@ -26,9 +45,11 @@
     [Parameter]
     public required EventCallback<CompanyDto> OnClose { get; set; }
 
-    private UpdateCompanyCommand IdentityProvider = new();
+    private UpdateCompanyCommand company = new();
     private string validationMessage { get; set; }
 
+    private CompanyWithApplicationsDto companyWithApplications { get; set; }
+    private List<ApplicationDto>? Applications { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -37,12 +58,28 @@
             var response = await ApiRequestService.SendAsync(new GetCompanyByIdQuery() { Id = Id });
             if (response.IsSuccess)
             {
-                IdentityProvider = new UpdateCompanyCommand()
+                companyWithApplications = response.Value;
+                company = new UpdateCompanyCommand()
                     {
                         Id = response.Value.Id,
                         Name = response.Value.Name
                     };
                 StateHasChanged();
+            }
+
+            var applicationsResponse = await ApiRequestService.SendAsync(new GetAllApplicationsQuery());
+            if (applicationsResponse.IsSuccess)
+            {
+                Applications = applicationsResponse.Value;
+            }
+            else
+            {
+                ToastService.Open(new ToastWithAutoClose()
+                    {
+                        Duration = TimeSpan.FromSeconds(5),
+                        Status = ToastStatus.Error,
+                        Title = "Der skete en fejl under hentningen af applikationer"
+                    });
             }
         }
     }
@@ -51,7 +88,7 @@
     {
         validationMessage = string.Empty;
 
-        var response = await ApiRequestService.SendAsync(IdentityProvider);
+        var response = await ApiRequestService.SendAsync(company);
         if (!response.IsSuccess)
         {
             validationMessage = response.Message; // ✅ Vis fejlbesked i UI
@@ -72,5 +109,62 @@
                 });
             await OnClose.InvokeAsync(response.Value);
         }
+    }
+
+    private async void Assign(int appId)
+    {
+        var responce = await ApiRequestService.SendAsync(new AssignApplicationToCompanyCommand() { ApplicationId = appId, CompanyId = company.Id });
+        if (responce.IsSuccess)
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Applikationen er tilknytte til virksomheden",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+            companyWithApplications.Applications.Add(new ApplicationDto()
+                {
+                    Id = appId,
+                    Name = ""
+                });
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
+        }
+
+        StateHasChanged();
+    }
+
+    private async void Remove(int appId)
+    {
+        var responce = await ApiRequestService.SendAsync(new RemoveApplicationFromCompanyCommand() { ApplicationId = appId, CompanyId = company.Id });
+        if (responce.IsSuccess)
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Applikationen er ikke længere tilknytte til virksomheden",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+            var app = companyWithApplications.Applications.FirstOrDefault(x => x.Id == appId);
+            companyWithApplications.Applications.Remove(app);
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
+        }
+
+        StateHasChanged();
     }
 }

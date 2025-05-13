@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DBIID.Shared.Features.Applications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,10 @@ namespace DBIID.Shared.Features.Companies
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
+    }
+
+    public class CompanyWithApplicationsDto : CompanyDto
+    {
+        public List<ApplicationDto> Applications { get; set; } = new List<ApplicationDto>();
     }
 }

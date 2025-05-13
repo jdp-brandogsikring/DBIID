@@ -65,6 +65,7 @@
     <Build Include="dbo\Tables\Companies.sql" />
     <Build Include="dbo\Tables\Applications.sql" />
     <Build Include="dbo\Tables\LinkUserCompanies.sql" />
+    <Build Include="dbo\Tables\LinkApplicationCompanies.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CompareWithLocal.scmp" />

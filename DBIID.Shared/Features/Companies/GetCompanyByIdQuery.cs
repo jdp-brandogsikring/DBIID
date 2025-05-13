@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace DBIID.Shared.Features.Companies
 {
     [HttpRequest(HttpMethodType.GET, "Companies/{Id}")]
-    public class GetCompanyByIdQuery : IRequest<Result<CompanyDto>>
+    public class GetCompanyByIdQuery : IRequest<Result<CompanyWithApplicationsDto>>
     {
         public int Id { get; set; }
     }
