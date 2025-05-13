@@ -10,5 +10,6 @@ namespace DBIID.Application.Features.Users
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+        IQueryable<User> GetAllIncludeCompanies();
     }
 }

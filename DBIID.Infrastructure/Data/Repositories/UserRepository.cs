@@ -2,6 +2,7 @@
 using DBIID.Domain.Entities;
 using DBIID.Infrastructure.Data.Commmen;
 using DBIID.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,12 @@ namespace DBIID.Infrastructure.Data.Repositories
     {
         public UserRepository(MasterDbContext context) : base(context)
         {
+        }
+
+        public IQueryable<User> GetAllIncludeCompanies()
+        {
+            return context.Users
+                .Include(x => x.Links);
         }
     }
 }
