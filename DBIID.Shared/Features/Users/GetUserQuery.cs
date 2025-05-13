@@ -12,7 +12,7 @@ namespace DBIID.Shared.Features.Users
 {
     // GET Request
     [HttpRequest(HttpMethodType.GET, "User/Read/{id}")]
-    public class GetUserQuery : IRequest<Result<UserDto>>
+    public class GetUserQuery : IRequest<Result<UserWithAssignedCompaniesDto>>
     {
         public int Id { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿@using DBI.DIGI.Components.Toast
+@using DBIID.Shared.Features.Companies
 @using DBIID.Shared.Features.Users
 @inject IApiRequestService ApiRequestService
 @inject IToastService ToastService
@@ -12,17 +13,35 @@
 
 <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnUpdateUser" Title="Opdater bruger"></DBI.DIGI.Components.Button>
 
-<br />
-<br />
-
-<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Ny adgangskode" @bind-Input="resetPasswordCommand.Password"></DBI.DIGI.Components.Inputs.LabeledTextInput>
-<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Sec" OnClick="OnResetPassword" Title="Nulstil adgangskode"></DBI.DIGI.Components.Button>
-
-
 @if (!string.IsNullOrEmpty(validationMessage))
 {
     <p style="color:red">@validationMessage</p>
 }
+
+<hr />
+
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="Ny adgangskode" @bind-Input="resetPasswordCommand.Password"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Sec" OnClick="OnResetPassword" Title="Nulstil adgangskode"></DBI.DIGI.Components.Button>
+
+<hr />
+
+<h5>Virksomheder</h5>
+@if (Companies is not null)
+{
+    foreach (var item in Companies)
+    {
+        <p>@item.Name</p>
+        @if(userWithAssignedCompaniesDto.Companies.Any(x => x.Id == item.Id))
+        {
+            <DBI.DIGI.Components.Button Title="Fjern" OnClick="() => Remove(item.Id)"></DBI.DIGI.Components.Button>
+        }
+        else
+        {
+            <DBI.DIGI.Components.Button Title="Tilføj" OnClick="() => Assign(item.Id)"></DBI.DIGI.Components.Button>
+        }
+    }
+}
+
 
 @code {
 
@@ -37,6 +56,9 @@
 
     private ResetPasswordCommand resetPasswordCommand = new();
 
+    private UserWithAssignedCompaniesDto userWithAssignedCompaniesDto { get; set; }
+    private List<CompanyDto>? Companies { get; set; }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -44,6 +66,7 @@
             var response = await ApiRequestService.SendAsync(new GetUserQuery() { Id = UserId });
             if (response.IsSuccess)
             {
+                userWithAssignedCompaniesDto = response.Value;
                 user = new UpdateUserCommand()
                     {
                         Id = response.Value.Id,
@@ -52,6 +75,22 @@
                         Email = response.Value.Email
                     };
                 StateHasChanged();
+            }
+
+            var companyResponse = await ApiRequestService.SendAsync(new GetAllCompaniesQuery());
+            if (companyResponse.IsSuccess)
+            {
+                Companies = companyResponse.Value;
+                StateHasChanged();
+            }
+            else
+            {
+                ToastService.Open(new ToastWithAutoClose()
+                    {
+                        Duration = TimeSpan.FromSeconds(5),
+                        Status = ToastStatus.Error,
+                        Title = "Kunne ikke hente virksomheder"
+                    });
             }
         }
     }
@@ -105,4 +144,62 @@
             await OnClose.InvokeAsync(response.Value);
         }
     }
+
+    private async void Assign(int companyId)
+    {
+        var responce = await ApiRequestService.SendAsync(new AssignUserToCompanyCommand() { UserId = user.Id, CompanyId = companyId });
+        if (responce.IsSuccess)
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Brugeren er tilknytte til virksomheden",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+            userWithAssignedCompaniesDto.Companies.Add(new CompanyDto()
+                {
+                    Id = companyId,
+                    Name = ""
+                });
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
+        }
+
+        StateHasChanged();
+    }
+
+    private async void Remove(int companyId)
+    {
+        var responce = await ApiRequestService.SendAsync(new RemoveUserFromCompanyCommand() { UserId = user.Id, CompanyId = companyId });
+        if (responce.IsSuccess)
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Status = ToastStatus.Success,
+                    Title = "Brugeren er ikke længere tilknytte til virksomheden",
+                    Duration = TimeSpan.FromSeconds(5)
+                });
+                var company = userWithAssignedCompaniesDto.Companies.FirstOrDefault(x => x.Id == companyId);
+                userWithAssignedCompaniesDto.Companies.Remove(company);
+        }
+        else
+        {
+            ToastService.Open(new ToastWithAutoClose()
+                {
+                    Duration = TimeSpan.FromSeconds(5),
+                    Status = ToastStatus.Error,
+                    Title = "Der skete en fejl"
+                });
+        }
+
+        StateHasChanged();
+    }
+
 }

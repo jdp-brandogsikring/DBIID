@@ -34,6 +34,7 @@ namespace DBIID.Application
             services.AddScoped<IOtpTransactionRepository, OtpTransactionRepository>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IApplicationRepository, ApplicationRepository>();
+            services.AddScoped<ILinkUserCompanyRepository, LinkUserCompanyRepository>();
 
             return services;
         }
