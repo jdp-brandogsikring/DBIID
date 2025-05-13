@@ -18,7 +18,7 @@ namespace DBIID.API.Controllers
             var value = _cacheStorage.Get<ApplicationLoginDto>(key);
             if (value != null)
             {
-                //_cacheStorage.Remove(key);
+                _cacheStorage.Remove(key);
                 return Ok(value);
             }
 

@@ -71,6 +71,8 @@
             if (applicationsResponse.IsSuccess)
             {
                 Applications = applicationsResponse.Value;
+                StateHasChanged();
+
             }
             else
             {
