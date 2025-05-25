@@ -26,6 +26,8 @@ namespace DBIID.Application.Features.Applications
                 Name = c.Name,
                 Token = c.Token,
                 Url = c.Url,
+                EnablePush = c.EnablePush,
+                PushUrl = c.PushUrl
             }).ToList();
             return Result<List<ApplicationDto>>.Success(applicationDtos);
         }

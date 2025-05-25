@@ -39,6 +39,7 @@ namespace DBIID.Application.Features.Users
                 Email = user.Email,
                 FamilyName = user.FamilyName,
                 GivenName = user.GivenName,
+                Phone = user.Phone,
                 Companies = new List<CompanyDto>()
             };
 

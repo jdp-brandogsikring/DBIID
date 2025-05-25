@@ -13,6 +13,8 @@ namespace DBIID.Shared.Features.Users
         public string Email { get; set; } = string.Empty;
         public string GivenName { get; set; } = string.Empty;
         public string FamilyName { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+
     }
 
     public class UserWithAssignedCompaniesDto : UserDto

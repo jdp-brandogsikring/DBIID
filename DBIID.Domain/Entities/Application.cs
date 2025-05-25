@@ -12,6 +12,9 @@ namespace DBIID.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
+        public string PushUrl { get; set; } = string.Empty;
+        public bool EnablePush { get; set; } = false;
+
 
         public List<LinkApplicationCompany> Links { get; set; } = new();
     }

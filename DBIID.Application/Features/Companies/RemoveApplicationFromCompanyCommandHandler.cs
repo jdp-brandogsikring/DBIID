@@ -1,6 +1,7 @@
 ﻿using DBIID.Application.Common.Data;
 using DBIID.Application.Common.Handlers;
 using DBIID.Application.Features.Applications;
+using DBIID.Application.Features.Users;
 using DBIID.Shared.Features.Companies;
 using DBIID.Shared.Results;
 using System;
@@ -16,16 +17,19 @@ namespace DBIID.Application.Features.Companies
         private readonly IApplicationRepository applicationRepository;
         private readonly ICompanyRepository companyRepository;
         private readonly ILinkApplicationCompanyRepository linkApplicationCompanyRepository;
+        private readonly IUserSyncService userSyncService;
         private readonly IUnitOfWork unitOfWork;
 
         public RemoveApplicationFromCompanyCommandHandler(IApplicationRepository applicationRepository,
                                                           ICompanyRepository companyRepository,
                                                           ILinkApplicationCompanyRepository linkApplicationCompanyRepository,
+                                                          IUserSyncService userSyncService,
                                                           IUnitOfWork unitOfWork)
         {
             this.applicationRepository = applicationRepository;
             this.companyRepository = companyRepository;
             this.linkApplicationCompanyRepository = linkApplicationCompanyRepository;
+            this.userSyncService = userSyncService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -49,6 +53,8 @@ namespace DBIID.Application.Features.Companies
             {
                 linkApplicationCompanyRepository.Delete(link);
                 await unitOfWork.SaveChangesAsync();
+
+                await userSyncService.CompanyRemovedFromApplication(company, application);
             }
 
             return Result.Success("Application removed from company successfully");

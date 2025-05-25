@@ -8,10 +8,12 @@
 
 <DBI.DIGI.Components.Inputs.LabeledTextInput Label="Navn" @bind-Input="command.Name"></DBI.DIGI.Components.Inputs.LabeledTextInput>
 <DBI.DIGI.Components.Inputs.LabeledTextInput Label="Url" @bind-Input="command.Url"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledTextInput Label="PushUrl" @bind-Input="command.PushUrl"></DBI.DIGI.Components.Inputs.LabeledTextInput>
+<DBI.DIGI.Components.Inputs.LabeledCheckbox Label="Synk brugere" @bind-IsChecked="command.EnablePush"/>
 
 <DBI.DIGI.Components.Button Class="DBI.DIGI.Components.ButtonType.Prim" OnClick="OnCreate" Title="Opret applikation"></DBI.DIGI.Components.Button>
 
-@if (!string.IsNullOrEmpty(validationMessage))
+@if(!string.IsNullOrEmpty(validationMessage))
 {
     <p style="color:red">@validationMessage</p>
 }

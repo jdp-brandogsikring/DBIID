@@ -29,6 +29,8 @@ namespace DBIID.Application.Features.Applications
                 Name = request.Name,
                 Url = request.Url,
                 Token = Guid.NewGuid().ToString().Replace("-", ""),
+                EnablePush = request.EnablePush,
+                PushUrl = request.PushUrl,
             };
             await applicationRepository.AddAsync(application);
             await unitOfWork.SaveChangesAsync();

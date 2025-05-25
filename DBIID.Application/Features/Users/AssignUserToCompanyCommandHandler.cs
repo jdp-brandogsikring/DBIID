@@ -5,6 +5,7 @@ using DBIID.Shared.Features.Users;
 using DBIID.Shared.Results;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,16 +17,19 @@ namespace DBIID.Application.Features.Users
         private readonly IUserRepository userRepository;
         private readonly ICompanyRepository companyRepository;
         private readonly ILinkUserCompanyRepository linkUserCompanyRepository;
+        private readonly IUserSyncService userSyncService;
         private readonly IUnitOfWork unitOfWork;
 
         public AssignUserToCompanyCommandHandler(IUserRepository userRepository,
                                              ICompanyRepository companyRepository,
                                              ILinkUserCompanyRepository linkUserCompanyRepository,
+                                             IUserSyncService userSyncService,
                                              IUnitOfWork unitOfWork)
         {
             this.userRepository = userRepository;
             this.companyRepository = companyRepository;
             this.linkUserCompanyRepository = linkUserCompanyRepository;
+            this.userSyncService = userSyncService;
             this.unitOfWork = unitOfWork;
         }
         public async Task<Result> Handle(AssignUserToCompanyCommand request, CancellationToken cancellationToken)
@@ -54,7 +58,10 @@ namespace DBIID.Application.Features.Users
                 };
                 await linkUserCompanyRepository.AddAsync(link);
                 await unitOfWork.SaveChangesAsync();
+            
+                await userSyncService.UserAddedToCompany(user, company);
             }
+
 
             return Result.Success("User assigned to company successfully");
         }

@@ -30,6 +30,9 @@ namespace DBIID.Application.Features.Applications
             }
             application.Name = request.Name;
             application.Url = request.Url;
+            application.EnablePush = request.EnablePush;
+            application.PushUrl = request.PushUrl;
+
             applicationRepository.Update(application);
             await unitOfWork.SaveChangesAsync();
             var applicationDto = new ApplicationDto
@@ -38,6 +41,8 @@ namespace DBIID.Application.Features.Applications
                 Name = application.Name,
                 Token = application.Token,
                 Url = application.Url,
+                EnablePush = application.EnablePush,
+                PushUrl = application.PushUrl,
 
             };
             return Result<ApplicationDto>.Success(applicationDto);

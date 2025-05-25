@@ -13,7 +13,7 @@
     <ProjectReference Include="..\..\DBIID.Shared\DBIID.Shared.csproj" />
     <ProjectReference Include="..\DBIID.API.Client\DBIID.API.Client.csproj" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-    <PackageReference Include="DBI.DIGI.Components" Version="20250321.5.0" />
+    <PackageReference Include="DBI.DIGI.Components" Version="20250523.1.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.14" />

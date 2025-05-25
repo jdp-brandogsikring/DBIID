@@ -34,6 +34,9 @@ namespace DBIID.Application.Features.Users
                 GivenName = request.GivenName,
                 FamilyName = request.FamilyName,
                 Email = request.Email,
+                Phone = request.Phone,
+                Created = DateTime.UtcNow,
+                Modified = DateTime.UtcNow,
                 Password = ""
             };
 

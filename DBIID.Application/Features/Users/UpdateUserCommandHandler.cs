@@ -16,14 +16,17 @@ namespace DBIID.Application.Features.Users
         private readonly IUserRepository userRepository;
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+        private readonly IUserSyncService userSyncService;
 
         public UpdateUserCommandHandler(IUserRepository userRepository,
                                         IUnitOfWork unitOfWork,
-                                        IMapper mapper)
+                                        IMapper mapper,
+                                        IUserSyncService userSyncService)
         {
             this.userRepository = userRepository;
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+            this.userSyncService = userSyncService;
         }
 
         public async Task<Result<UserDto>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -43,7 +46,13 @@ namespace DBIID.Application.Features.Users
             user.GivenName = request.GivenName;
             user.FamilyName = request.FamilyName;
             user.Email = request.Email;
+            user.Phone = request.Phone;
+            user.Modified = DateTime.UtcNow;
+
             await unitOfWork.SaveChangesAsync();
+
+            await userSyncService.PushUserChangesToClients(user, UserSyncActionType.Update);
+
             return Result<UserDto>.Success(mapper.Map<UserDto>(user));
         }
     }

@@ -1,4 +1,5 @@
 ﻿using DBIID.Application.Features.Auth;
+using DBIID.Application.Features.Users;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace DBIID.Application
             services.AddAutoMapper(typeof(AutoMapperProfil));
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IOtpService, OtpService>();
-
+            services.AddScoped<IUserSyncService, UserSyncService>();
 
             return services;
         }

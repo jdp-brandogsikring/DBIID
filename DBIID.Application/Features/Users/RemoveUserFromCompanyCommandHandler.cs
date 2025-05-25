@@ -16,15 +16,18 @@ namespace DBIID.Application.Features.Users
         private readonly IUserRepository userRepository;
         private readonly ICompanyRepository companyRepository;
         private readonly ILinkUserCompanyRepository linkUserCompanyRepository;
+        private readonly IUserSyncService userSyncService;
         private readonly IUnitOfWork unitOfWork;
         public RemoveUserFromCompanyCommandHandler(IUserRepository userRepository,
                                               ICompanyRepository companyRepository,
                                               ILinkUserCompanyRepository linkUserCompanyRepository,
+                                              IUserSyncService userSyncService,
                                               IUnitOfWork unitOfWork)
         {
             this.userRepository = userRepository;
             this.companyRepository = companyRepository;
             this.linkUserCompanyRepository = linkUserCompanyRepository;
+            this.userSyncService = userSyncService;
             this.unitOfWork = unitOfWork;
         }
         public async Task<Result> Handle(RemoveUserFromCompanyCommand request, CancellationToken cancellationToken)
@@ -47,6 +50,8 @@ namespace DBIID.Application.Features.Users
             {
                 linkUserCompanyRepository.Delete(link);
                 await unitOfWork.SaveChangesAsync();
+
+                await userSyncService.UserRemovedCompany(user, company);
             }
 
             return Result.Success("User removed from company successfully");
