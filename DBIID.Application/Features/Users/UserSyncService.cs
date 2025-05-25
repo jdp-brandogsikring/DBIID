@@ -16,11 +16,13 @@ namespace DBIID.Application.Features.Users
     {
         private readonly IApplicationRepository applicationRepository;
         private readonly ILinkUserCompanyRepository linkUserCompanyRepository;
+        private readonly HttpClient httpClient;
 
-        public UserSyncService(IApplicationRepository applicationRepository, ILinkUserCompanyRepository linkUserCompanyRepository)
+        public UserSyncService(IApplicationRepository applicationRepository, ILinkUserCompanyRepository linkUserCompanyRepository, HttpClient httpClient)
         {
             this.applicationRepository = applicationRepository;
             this.linkUserCompanyRepository = linkUserCompanyRepository;
+            this.httpClient = httpClient;
         }
 
         public async Task CompanyAddedToApplication(Company company, Domain.Entities.Application application)
@@ -88,7 +90,6 @@ namespace DBIID.Application.Features.Users
             try
             {
 
-                HttpClient httpClient = new HttpClient();
                 var content = Newtonsoft.Json.JsonConvert.SerializeObject(new
                 {
                     Id = user.Id,
