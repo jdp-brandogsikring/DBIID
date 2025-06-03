@@ -7,7 +7,8 @@
 @inject NavigationManager navigationManager
 @inject IApiRequestService ApiRequestService
 @inject IToastService ToastService
-@inject AuthenticationStateProvider AuthenticationState 
+@inject AuthenticationStateProvider AuthenticationState
+
 
 <h1>SSO Login</h1>
 
@@ -95,6 +96,8 @@
             {
                 loginDto = response.Value;
                 StateHasChanged();
+                // string url = loginDto?.ApplicationUrl + "?sso=" + loginDto?.SSOToken;
+                // navigationManager.NavigateTo(url);
             }
             else
             {

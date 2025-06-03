@@ -69,7 +69,7 @@ public class AuthController : ControllerBase
             return BadRequest(result.Message);
         }
 
-        DateTime expire = DateTime.Now.AddMinutes(30);
+        DateTime expire = DateTime.Now.AddMinutes(4);
         string token = _jwtService.GenerateToken(result.Value.Id.ToString(), result.Value.Email, "Admin", expire);
 
         return Ok(new VerifyOtpResponse
