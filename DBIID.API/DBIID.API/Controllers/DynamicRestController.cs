@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 [ApiController]
 [Route("api")]
 [Authorize]
-[ApiExplorerSettings(IgnoreApi = true)] // ✅ Skjuler denne controller fra Swagger
+[ApiExplorerSettings(IgnoreApi = true)] // Skjuler denne controller fra Swagger
 public class DynamicRestController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -36,18 +36,18 @@ public class DynamicRestController : ControllerBase
         var requestInstance = Activator.CreateInstance(requestType);
         var errors = new List<string>();
 
-        // 🔹 Extract URL parameters
+        // URL parameters
         var attribute = requestType.GetCustomAttribute<HttpRequestAttribute>();
         var paramNames = ExtractRouteParameters(attribute.Route);
         var paramValues = ExtractValuesFromUrl(attribute.Route, url);
 
-        // 🔹 Map URL parameters to request properties (case-insensitive)
+        // Map URL parameters to request properties
         var properties = requestType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                     .ToDictionary(p => p.Name.ToLower(), p => p);
 
         var requestBodyDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-        // 🔹 Map URL params and validate type conversion
+        // Map URL params and validate type conversion
         foreach (var param in paramNames)
         {
             string paramLower = param.ToLower();
@@ -76,7 +76,7 @@ public class DynamicRestController : ControllerBase
             }
         }
 
-        // 🔹 Deserialize and validate the request body if not GET or DELETE
+        // Deserialize and validate the request body if not GET or DELETE
         if (Request.Method != "GET" && Request.Method != "DELETE" && requestBody != null)
         {
             var bodyData = JsonSerializer.Deserialize(requestBody.ToString(), requestType);
@@ -90,7 +90,7 @@ public class DynamicRestController : ControllerBase
                 }
             }
 
-            // 🔹 Compare URL values with Body values
+            // Compare URL values with Body values
             foreach (var param in paramNames)
             {
                 string paramLower = param.ToLower();
@@ -107,7 +107,7 @@ public class DynamicRestController : ControllerBase
             }
         }
 
-        // 🔹 Return errors if any exist
+        // Return errors if any exist
         if (errors.Any())
         {
             return BadRequest(new { errors });

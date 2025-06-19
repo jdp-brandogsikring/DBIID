@@ -29,10 +29,9 @@
         validationMessage = string.Empty;
 
         var response = await ApiRequestService.SendAsync(user);
-
         if (!response.IsSuccess)
         {
-            validationMessage = response.Message; // ✅ Vis fejlbesked i UI
+            validationMessage = response.Message;
             ToastService.Open(new ToastWithAutoClose()
                 {
                     Duration = TimeSpan.FromSeconds(5),

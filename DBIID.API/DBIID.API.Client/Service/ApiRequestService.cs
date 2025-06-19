@@ -40,15 +40,15 @@ public class ApiRequestService : IApiRequestService
     /// </summary>
     public async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
-        await _authStartup.Initialization; // ✅ vent på auth (engang)
+        await _authStartup.Initialization; // vent på auth (engang)
 
         var validationResult = await ValidateRequest(request);
         if (!validationResult.IsSuccess)
         {
-            string validationResultAsString = JsonSerializer.Serialize(validationResult); // ✅ Serialize valideringsfejl
-            var validationError = JsonSerializer.Deserialize<TResponse>(validationResultAsString); // ✅ Deserialize valideringsfejl
+            string validationResultAsString = JsonSerializer.Serialize(validationResult); 
+            var validationError = JsonSerializer.Deserialize<TResponse>(validationResultAsString); 
 
-            return validationError; // ✅ Returnér valideringsfejl uden at sende API-kald
+            return validationError; // Returnér valideringsfejl uden at sende API-kald
         }
 
         var requestType = request.GetType();
@@ -64,11 +64,6 @@ public class ApiRequestService : IApiRequestService
         if (httpMethod == HttpMethod.Post || httpMethod == HttpMethod.Put)
         {
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(request);
-
-#if DEBUG
-            Console.WriteLine("📦 Request JSON: " + json); // Debug
-
-#endif
             httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
         }
 
@@ -81,11 +76,10 @@ public class ApiRequestService : IApiRequestService
     /// </summary>
     private async Task<Result<TResponse>> ValidateRequest<TResponse>(IRequest<TResponse> request)
     {
-        // ✅ Hent validator for `request`, hvis den findes i DI-containeren
         var validatorType = typeof(IValidator<>).MakeGenericType(request.GetType());
         var validatorObj = _serviceProvider.GetService(validatorType);
 
-        if (validatorObj == null) return Result<TResponse>.Success(); // ✅ Ingen valideringsfejl, fortsæt
+        if (validatorObj == null) return Result<TResponse>.Success(); 
 
         var validator = (IValidator)validatorObj;
         var validationResult = await validator.ValidateAsync(new ValidationContext<object>(request));
@@ -93,7 +87,7 @@ public class ApiRequestService : IApiRequestService
         if (validationResult.IsValid) return Result<TResponse>.Success();
 
         string errorMessages = string.Join("\n", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-        return Result<TResponse>.ValidationError(errorMessages) as Result<TResponse>; // ✅ Returnér valideringsfejl
+        return Result<TResponse>.ValidationError(errorMessages) as Result<TResponse>;
     }
 
     /// <summary>
@@ -118,8 +112,7 @@ public class ApiRequestService : IApiRequestService
             }
             else
             {
-                // Leave {key} unchanged if no matching property
-                Console.WriteLine($"⚠️ Property '{key}' not found on request object.");
+                Console.WriteLine($"Property '{key}' not found on request object.");
             }
         }
 
@@ -148,11 +141,9 @@ public class ApiRequestService : IApiRequestService
     {
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            // ✅ Send brugeren til login med returnUrl
             var returnUrl = Uri.EscapeDataString(_navigation.Uri.Replace(_navigation.BaseUri, "/"));
             _navigation.NavigateTo($"/login?returnUrl={returnUrl}", forceLoad: true);
 
-            // Stop yderligere behandling
             return default!;
         }
 
